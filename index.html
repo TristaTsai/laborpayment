@@ -340,35 +340,40 @@
     // =========================
     // 6) PDF 中文不變方塊：內嵌中文字體
     // =========================
-    let __fontReady = null;
+ // ====== PDF 中文不亂碼：每個 doc 都要註冊字體（抓字體只做一次）======
+let __fontBase64 = null;
+let __fontFetchPromise = null;
 
-    function arrayBufferToBase64(buffer) {
-      let binary = "";
-      const bytes = new Uint8Array(buffer);
-      const chunkSize = 0x8000;
-      for (let i = 0; i < bytes.length; i += chunkSize) {
-        const chunk = bytes.subarray(i, i + chunkSize);
-        binary += String.fromCharCode.apply(null, chunk);
-      }
-      return btoa(binary);
+function arrayBufferToBase64(buffer) {
+  let binary = "";
+  const bytes = new Uint8Array(buffer);
+  const chunkSize = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    const chunk = bytes.subarray(i, i + chunkSize);
+    binary += String.fromCharCode.apply(null, chunk);
+  }
+  return btoa(binary);
+}
+
+async function ensureChineseFont(doc) {
+  // 1) 只抓字體一次，存成 base64
+  if (!__fontBase64) {
+    if (!__fontFetchPromise) {
+      __fontFetchPromise = (async () => {
+        const res = await fetch("./fonts/NotoSansTC-Regular.ttf", { cache: "no-store" });
+        if (!res.ok) throw new Error("字體載入失敗：找不到 ./fonts/NotoSansTC-Regular.ttf");
+        const buf = await res.arrayBuffer();
+        __fontBase64 = arrayBufferToBase64(buf);
+      })();
     }
+    await __fontFetchPromise;
+  }
 
-    async function ensureChineseFont(doc) {
-      // 只載入一次（避免每次下載都重抓字體）
-      if (!__fontReady) {
-        __fontReady = (async () => {
-          const res = await fetch("./fonts/NotoSansTC-Regular.ttf");
-          if (!res.ok) throw new Error("字體載入失敗：請確認 fonts/NotoSansTC-Regular.ttf 存在於 repo");
-          const buf = await res.arrayBuffer();
-          const b64 = arrayBufferToBase64(buf);
-          doc.addFileToVFS("NotoSansTC-Regular.ttf", b64);
-          doc.addFont("NotoSansTC-Regular.ttf", "NotoSansTC", "normal");
-        })();
-      }
-      await __fontReady;
-      doc.setFont("NotoSansTC", "normal");
-    }
-
+  // 2) ⚠️ 每次 new jsPDF() 都是新 doc，所以每次都要註冊到這個 doc
+  doc.addFileToVFS("NotoSansTC-Regular.ttf", __fontBase64);
+  doc.addFont("NotoSansTC-Regular.ttf", "NotoSansTC", "normal");
+  doc.setFont("NotoSansTC", "normal");
+} 
     // =========================
     // 7) 下載 PDF：固定版型
     // =========================
