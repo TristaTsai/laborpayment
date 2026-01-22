@@ -2,78 +2,78 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="utf-8">
-  <title>PDF 中文測試（內嵌字體版）</title>
+  <title>勞務報酬單（穩定輸出版）</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <style>
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: system-ui, -apple-system, "Noto Sans TC", sans-serif;
+      padding: 24px;
+      background: #f5f5f5;
+    }
+    .sheet {
+      background: #fff;
       padding: 32px;
-      line-height: 1.6;
+      max-width: 794px; /* A4 寬 */
+      margin: auto;
+      box-shadow: 0 0 8px rgba(0,0,0,.1);
     }
     h1 {
-      margin-bottom: 16px;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .row {
+      margin-bottom: 12px;
+    }
+    .label {
+      font-weight: 600;
     }
     button {
+      margin: 24px auto;
+      display: block;
       font-size: 18px;
       padding: 12px 24px;
-      cursor: pointer;
-    }
-    .hint {
-      margin-top: 16px;
-      font-size: 14px;
-      color: #555;
     }
   </style>
 </head>
 
 <body>
-  <h1>PDF 中文測試（內嵌字體版）</h1>
+
+  <div id="pdfArea" class="sheet">
+    <h1>勞務報酬單</h1>
+
+    <div class="row"><span class="label">公司名稱：</span>東點娛樂有限公司</div>
+    <div class="row"><span class="label">專案名稱：</span>瑞鼎科技尾牙晚宴</div>
+    <div class="row"><span class="label">勞務內容：</span>禮賓接待</div>
+    <div class="row"><span class="label">所得類別：</span>9A 執行業務所得</div>
+    <div class="row"><span class="label">金額：</span>NT$ 6,000</div>
+  </div>
 
   <button id="downloadPdf">下載 PDF</button>
 
-  <div class="hint">
-    若下載後 PDF 內中文正常顯示，代表「所有問題已解決」。
-  </div>
-
+  <!-- html2canvas -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <!-- jsPDF -->
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
   <script>
-    /********************************************************
-     * 內嵌中文字體（已轉成 base64，Safari 安全）
-     * 字體：Noto Sans TC Regular（裁切後最小可用集）
-     ********************************************************/
-    const NOTO_TC_BASE64 =
-      "AAEAAAALAIAAAwAwT1MvMggAAAC8AAAAYGNtYXAWxGZyAAABHAAAADZnbHlm5Q6K"+
-      "AAABrAAAAR5oZWFkA9cC3gAAACgAAAA2aGhlYQ5YBDcAAABIAAAAJGhtdHgC3AAAAA"+
-      "B4AAAACGxvY2EDVgTqAAABkAAAABptYXhwAA0AIAAAARAAAAAgbmFtZc2a+JkAAAFg"+
-      "AAABlnBvc3QAAwAAAAAG0AAAACBwcmVwAAIAAAAB4AAAACAAAwQAAZAABQAAAUAAA"+
-      "gAAAAEAAAAA";
+    document.getElementById("downloadPdf").addEventListener("click", async function () {
+      const area = document.getElementById("pdfArea");
 
-    document.addEventListener("DOMContentLoaded", function () {
-      const btn = document.getElementById("downloadPdf");
-
-      btn.addEventListener("click", function () {
-        const jsPDF = window.jspdf.jsPDF;
-        const doc = new jsPDF({ unit: "mm", format: "a4" });
-
-        // 註冊中文字體
-        doc.addFileToVFS("NotoSansTC-Regular.ttf", NOTO_TC_BASE64);
-        doc.addFont("NotoSansTC-Regular.ttf", "NotoSansTC", "normal");
-        doc.setFont("NotoSansTC", "normal");
-
-        // 測試內容
-        doc.setFontSize(18);
-        doc.text("測試中文成功", 20, 40);
-
-        doc.setFontSize(14);
-        doc.text("勞務報酬單 PDF 中文顯示正常", 20, 60);
-        doc.text("公司名稱：東點娛樂有限公司", 20, 75);
-        doc.text("專案名稱：瑞鼎科技尾牙晚宴", 20, 90);
-
-        doc.save("test.pdf");
+      const canvas = await html2canvas(area, {
+        scale: 2,
+        useCORS: true
       });
+
+      const imgData = canvas.toDataURL("image/png");
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF("p", "mm", "a4");
+
+      const pdfWidth = 210;
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save("labor-form.pdf");
     });
   </script>
 </body>
