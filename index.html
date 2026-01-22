@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>勞務報酬單</title>
+  <title>三壐國際整合行銷｜勞務報酬單</title>
+
   <style>
     :root{
       --bg:#f3f4f6;
@@ -13,7 +14,6 @@
       --ink:#111827;
       --muted:#6b7280;
       --header:#334155;
-      --btn:#1f2937;
       --shadow:0 6px 20px rgba(0,0,0,.08);
     }
     *{box-sizing:border-box}
@@ -31,30 +31,33 @@
       overflow:hidden;
       box-shadow:var(--shadow);
     }
+
+    /* ====== 你要的雙行大標 ====== */
     .topbar{
       background:var(--header);
       color:#fff;
       text-align:center;
-      padding:12px 10px;
-      font-weight:800;
-      letter-spacing:.5px;
+      padding:14px 10px 12px;
+      font-weight:900;
+      letter-spacing:.6px;
+      line-height:1.25;
     }
+    .topbar .t1{font-size:16px; opacity:.95;}
+    .topbar .t2{font-size:20px; margin-top:4px;}
+
+    /* 只有日期（你說不要公司名稱/電話） */
     .toprow{
       display:grid;
-      grid-template-columns: 1.2fr 1fr 1fr;
+      grid-template-columns: 1fr;
       gap:10px;
       padding:12px;
       border-bottom:1px solid var(--line);
       align-items:center;
     }
-    .topfield{
-      display:flex;
-      gap:8px;
-      align-items:center;
-    }
+    .topfield{display:flex;gap:8px;align-items:center;justify-content:flex-end;}
     .topfield .lab{font-size:12px;color:var(--muted);min-width:68px;text-align:right}
     .topfield input{
-      width:100%;
+      width:220px;
       padding:10px 10px;
       border:1px solid var(--line);
       border-radius:6px;
@@ -62,7 +65,6 @@
       background:#f9fafb;
     }
 
-    /* form grid rows: left vertical label + content */
     .row{
       display:grid;
       grid-template-columns: 76px 1fr;
@@ -93,7 +95,7 @@
       font-size:14px;
       background:#fff;
     }
-    .hint{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5}
+
     .amountRow{
       display:grid;
       grid-template-columns: 120px 1fr auto;
@@ -108,7 +110,7 @@
     }
     .calc .sumline{
       display:flex;gap:10px;align-items:center;justify-content:flex-start;
-      font-weight:800;margin-top:6px;
+      font-weight:900;margin-top:6px;
     }
     .checkline{
       display:flex;gap:10px;align-items:center;justify-content:flex-end;
@@ -125,7 +127,7 @@
     .uploadBox{
       border:2px dashed var(--line2);
       border-radius:10px;
-      height:140px;
+      height:150px;
       display:flex;
       align-items:center;
       justify-content:center;
@@ -133,23 +135,23 @@
       overflow:hidden;
       background:#fafafa;
       cursor:pointer;
+      padding:10px;
+      text-align:center;
     }
     .uploadBox .txt{
-      text-align:center;
       color:#6b7280;
       font-size:13px;
-      line-height:1.4;
+      line-height:1.5;
     }
+    .uploadBox .txt b{color:#374151}
     .uploadBox img{
       position:absolute; inset:0;
       width:100%; height:100%;
       object-fit:contain;
       background:#fff;
+      display:none;
     }
     .uploadBox input{display:none}
-
-    .uploadSingle{margin-top:10px}
-    .uploadSingle .uploadBox{height:160px}
 
     /* signature */
     .signBox{
@@ -175,13 +177,11 @@
       background:#fff;
       border-radius:8px;
       padding:8px 12px;
-      font-weight:700;
+      font-weight:800;
       cursor:pointer;
     }
 
-    .footer{
-      padding:14px;
-    }
+    .footer{padding:14px;}
     .notice{
       font-size:12px;color:#4b5563;line-height:1.7;margin-bottom:12px;
     }
@@ -201,9 +201,9 @@
       gap:10px;
     }
 
-    /* ===== PDF printable area ===== */
+    /* ===== PDF printable area (table) ===== */
     #printArea{
-      width: 794px; /* A4 px at 96dpi-ish */
+      width: 794px;
       background:#fff;
       color:#111;
       padding:0;
@@ -213,9 +213,10 @@
     .p-title{
       text-align:center;
       font-weight:900;
-      font-size:20px;
+      font-size:18px;
       padding:10px 8px;
       border-bottom:1px solid #000;
+      line-height:1.25;
     }
     .p-table{
       width:100%;
@@ -229,9 +230,7 @@
       vertical-align:middle;
       word-break:break-word;
     }
-    .p-muted{color:#111;}
     .p-center{text-align:center}
-    .p-right{text-align:right}
     .p-bold{font-weight:800}
     .p-box{
       border:1px dashed #777;
@@ -248,12 +247,10 @@
       line-height:1.6;
     }
 
-    /* mobile tweak */
     @media (max-width: 520px){
-      .toprow{grid-template-columns:1fr; gap:8px}
       .row{grid-template-columns:64px 1fr}
       .grid2{grid-template-columns:100px 1fr}
-      .uploads2{grid-template-columns:1fr 1fr}
+      .topfield input{width:100%}
     }
   </style>
 </head>
@@ -261,18 +258,13 @@
 <body>
   <div class="wrap">
     <div class="card">
-      <div class="topbar">勞務報酬單</div>
+      <div class="topbar">
+        <div class="t1">三壐國際整合行銷</div>
+        <div class="t2">勞務報酬單</div>
+      </div>
 
-      <!-- header fields -->
+      <!-- 只保留日期 -->
       <div class="toprow">
-        <div class="topfield">
-          <div class="lab">公司名稱</div>
-          <input id="companyName" placeholder="" />
-        </div>
-        <div class="topfield">
-          <div class="lab">聯絡電話</div>
-          <input id="companyContact" placeholder="" />
-        </div>
         <div class="topfield">
           <div class="lab">製表日期</div>
           <input id="formDate" type="date" />
@@ -283,11 +275,11 @@
       <div class="row">
         <div class="vtag">領款人基本資料</div>
         <div class="content">
-          <div class="grid2"><div class="lab">姓名</div><input id="payeeName" placeholder="請輸入姓名"></div>
-          <div class="grid2"><div class="lab">身分證字號</div><input id="idNumber" placeholder="請輸入身分證字號或居留證證號"></div>
-          <div class="grid2"><div class="lab">聯絡方式</div><input id="contact" placeholder="請輸入聯絡方式（Email 或電話）"></div>
-          <div class="grid2"><div class="lab">戶籍地址</div><input id="address" placeholder="請輸入戶籍地址"></div>
-          <div class="grid2"><div class="lab">國籍</div><input id="nationality" placeholder="" value="臺灣"></div>
+          <div class="grid2"><div class="lab">姓名</div><input id="payeeName"></div>
+          <div class="grid2"><div class="lab">身分證字號</div><input id="idNumber"></div>
+          <div class="grid2"><div class="lab">聯絡方式</div><input id="contact"></div>
+          <div class="grid2"><div class="lab">戶籍地址</div><input id="address"></div>
+          <div class="grid2"><div class="lab">國籍</div><input id="nationality" value="臺灣"></div>
         </div>
       </div>
 
@@ -295,14 +287,14 @@
       <div class="row">
         <div class="vtag">專案資訊</div>
         <div class="content">
-          <div class="grid2"><div class="lab">專案名稱</div><input id="projectName" placeholder=""></div>
-          <div class="grid2"><div class="lab">勞務內容</div><input id="serviceContent" placeholder=""></div>
+          <div class="grid2"><div class="lab">專案名稱</div><input id="projectName"></div>
+          <div class="grid2"><div class="lab">勞務內容</div><input id="serviceContent"></div>
           <div class="grid2">
             <div class="lab">所得類別</div>
             <select id="incomeCategory">
               <option value="9A 執行業務所得">9A 執行業務所得</option>
+              <option value="9B 稿費">9B 稿費</option>
               <option value="50 薪資所得">50 薪資所得</option>
-              <option value="其他">其他</option>
             </select>
           </div>
         </div>
@@ -314,20 +306,13 @@
         <div class="content">
           <div class="amountRow">
             <div class="lab" style="text-align:right;font-weight:700;color:#374151;">應付總額：</div>
-            <input id="grossAmount" inputmode="numeric" placeholder="" />
+            <input id="grossAmount" inputmode="numeric" />
             <div class="unit">元</div>
           </div>
 
           <div class="calc">
             <div>－ 代扣繳所得稅：<span class="p-muted">（達 20,010 元，代扣繳 10%）</span>：<span id="taxAmt">0</span> 元</div>
-            <div>－ 二代健保補充保費：<span class="p-muted">（達 20,000 元，代扣繳 2.11%）</span>：<span id="nhiAmt">0</span> 元
-              <span style="float:right; font-size:13px;">
-                <label style="display:inline-flex; gap:6px; align-items:center; font-weight:700; margin:0;">
-                  <input id="unionInsured" type="checkbox" style="width:16px;height:16px;">
-                  領款人有投保工會
-                </label>
-              </span>
-            </div>
+            <div>－ 二代健保補充保費：<span class="p-muted">（達 20,000 元，代扣繳 2.11%）</span>：<span id="nhiAmt">0</span> 元</div>
             <div class="sumline">
               <div style="width:18px;text-align:center;">＝</div>
               <div>應付淨額：<span id="netAmt">0</span> 元</div>
@@ -336,26 +321,29 @@
         </div>
       </div>
 
-      <!-- 身分證件 -->
+      <!-- 身分證件（你要正面/反面） -->
       <div class="row">
         <div class="vtag">領款人身分證件</div>
         <div class="content">
           <div class="uploads2">
-            <label class="uploadBox" id="boxFront">
-              <input id="idFront" type="file" accept="image/*">
-              <div class="txt"><div style="font-weight:800;">正面</div>點擊上傳圖片</div>
-              <img id="frontPreview" alt="" />
-            </label>
-            <label class="uploadBox" id="boxBack">
-              <input id="idBack" type="file" accept="image/*">
-              <div class="txt"><div style="font-weight:800;">反面</div>點擊上傳圖片</div>
-              <img id="backPreview" alt="" />
-            </label>
+            <label class="uploadBox">
+  <span class="cornerTag">正面</span>
+  <input id="idFront" type="file" accept="image/*">
+  <div class="txt"><b>身分證正面</b><br>點擊上傳圖片（可立即預覽）</div>
+  <img id="frontPreview" alt="" />
+</label>
+
+<label class="uploadBox">
+  <span class="cornerTag">反面</span>
+  <input id="idBack" type="file" accept="image/*">
+  <div class="txt"><b>身分證反面</b><br>點擊上傳圖片（可立即預覽）</div>
+  <img id="backPreview" alt="" />
+</label>
           </div>
         </div>
       </div>
 
-      <!-- 付款方式 -->
+      <!-- 付款方式（含存摺封面提示） -->
       <div class="row">
         <div class="vtag">付款方式</div>
         <div class="content">
@@ -364,10 +352,23 @@
           <div class="grid2"><div class="lab">戶名</div><input id="accountName" placeholder="請輸入戶名"></div>
           <div class="grid2"><div class="lab">帳號</div><input id="accountNo" placeholder="請輸入帳號"></div>
 
-          <div class="uploadSingle">
-            <label class="uploadBox">
+          <div style="margin-top:10px;">
+            <label class="uploadBox" style="height:170px;">
+<label class="uploadBox">
+  <span class="cornerTag">正面</span>
+  <input id="idFront" type="file" accept="image/*">
+  <div class="txt"><b>身分證正面</b><br>點擊上傳圖片（可立即預覽）</div>
+  <img id="frontPreview" alt="" />
+</label>
+
+<label class="uploadBox">
+  <span class="cornerTag">反面</span>
+  <input id="idBack" type="file" accept="image/*">
+  <div class="txt"><b>身分證反面</b><br>點擊上傳圖片（可立即預覽）</div>
+  <img id="backPreview" alt="" />
+</label>
               <input id="bankbook" type="file" accept="image/*">
-              <div class="txt"><div style="font-weight:800;">帳戶影本</div>點擊上傳帳戶封面影本</div>
+              <div class="txt"><b>存摺封面</b><br>點擊上傳存摺封面影本（可立即預覽）</div>
               <img id="bankPreview" alt="" />
             </label>
           </div>
@@ -379,7 +380,7 @@
         <div class="vtag">簽名</div>
         <div class="content">
           <div class="signBox">
-            <div style="text-align:center;color:#6b7280;font-weight:800;margin-bottom:10px;">領款人簽名（惠請手寫簽名）</div>
+            <div style="text-align:center;color:#6b7280;font-weight:900;margin-bottom:10px;">領款人簽名（惠請手寫簽名）</div>
             <canvas id="signCanvas"></canvas>
             <div class="signTools">
               <button class="miniBtn" id="clearSign" type="button">清除</button>
@@ -392,7 +393,7 @@
         <div class="notice">
           說明：<br>
           1. 本表單所有欄位若未完整填寫，將會影響您的請款流程，敬請配合。<br>
-          2. 填寫完畢後，請下載 PDF 檔案並傳送給本公司企劃人員。<br>
+          2. 填寫完畢後，請下載 PDF 檔案並傳送給企劃人員。<br>
           3. 本工具不會紀錄及搜集任何資料與圖片，重新整理頁面後，所有已填資料將會自動消失，請安心使用。
         </div>
         <button id="downloadBtn" class="downloadBtn" type="button">下載勞務報酬單 ⬇︎</button>
@@ -400,15 +401,14 @@
     </div>
   </div>
 
-  <!-- Hidden printable area for PDF (matches your 3rd image style) -->
+  <!-- Hidden printable area for PDF -->
   <div style="position:absolute; left:-99999px; top:-99999px;">
     <div id="printArea">
-      <div class="p-title">勞務報酬單</div>
+      <div class="p-title">三壐國際整合行銷<br>勞務報酬單</div>
       <table class="p-table">
         <tr>
-          <td colspan="3"><span class="p-bold">公司名稱：</span><span id="p_companyName"></span></td>
-          <td colspan="2"><span class="p-bold">公司聯絡方式：</span><span id="p_companyContact"></span></td>
-          <td colspan="2"><span class="p-bold">製表日期：</span><span id="p_formDate"></span></td>
+          <td colspan="5"><span class="p-bold">製表日期：</span><span id="p_formDate"></span></td>
+          <td colspan="2"><span class="p-bold">專案名稱：</span><span id="p_projectName"></span></td>
         </tr>
 
         <tr>
@@ -436,62 +436,51 @@
         </tr>
 
         <tr>
-          <td rowspan="3" class="p-center p-bold">金<br>額</td>
-          <td class="p-center p-bold" colspan="2">應付總額：</td>
+          <td rowspan="2" class="p-center p-bold">金<br>額</td>
+          <td class="p-center p-bold" colspan="2">應付總額</td>
           <td colspan="4"><span id="p_grossAmount"></span> 元</td>
         </tr>
         <tr>
           <td colspan="6">
             － 代扣繳所得稅： <span id="p_taxAmt"></span> 元<br>
             － 二代健保補充保費： <span id="p_nhiAmt"></span> 元
-            <span style="float:right;">[ <span id="p_unionBox"></span> ] 領款人有投保工會</span>
             <div style="margin-top:6px;font-weight:900;">＝ 應付淨額： <span id="p_netAmt"></span> 元</div>
           </td>
         </tr>
 
         <tr>
-          <td colspan="6" class="p-bold">專案名稱： <span id="p_projectName" style="font-weight:700;"></span></td>
+          <td rowspan="2" class="p-center p-bold">身<br>分<br>證<br>件</td>
+          <td colspan="3" class="p-center p-bold">身分證正面</td>
+          <td colspan="3" class="p-center p-bold">身分證反面</td>
+        </tr>
+        <tr>
+          <td colspan="3"><div class="p-box"><img id="p_frontImg" alt=""></div></td>
+          <td colspan="3"><div class="p-box"><img id="p_backImg" alt=""></div></td>
         </tr>
 
         <tr>
-          <td rowspan="2" class="p-center p-bold">領<br>款<br>人<br>身<br>分<br>證<br>件</td>
-          <td colspan="3" class="p-center p-bold">正面</td>
-          <td colspan="3" class="p-center p-bold">反面</td>
-        </tr>
-        <tr>
-          <td colspan="3">
-            <div class="p-box"><img id="p_frontImg" alt=""></div>
-          </td>
-          <td colspan="3">
-            <div class="p-box"><img id="p_backImg" alt=""></div>
-          </td>
-        </tr>
-
-        <tr>
-          <td class="p-center p-bold">付<br>款<br>方<br>式</td>
+          <td class="p-center p-bold">付<br>款<br>資<br>訊</td>
           <td colspan="6">
-            透過銀行轉帳/匯款，領款人帳戶資訊<br>
-            銀行：<span id="p_bankName"></span>　分行：<span id="p_bankBranch"></span>　帳號：<span id="p_accountNo"></span>　戶名：<span id="p_accountName"></span>
+            銀行：<span id="p_bankName"></span>
+           　分行：<span id="p_bankBranch"></span>
+           　帳號：<span id="p_accountNo"></span>
+           　戶名：<span id="p_accountName"></span>
           </td>
         </tr>
 
         <tr>
-          <td class="p-center p-bold" colspan="4">帳戶影本</td>
+          <td class="p-center p-bold" colspan="4">存摺封面</td>
           <td class="p-center p-bold" colspan="3">領款人簽名</td>
         </tr>
         <tr>
-          <td colspan="4">
-            <div class="p-box"><img id="p_bankImg" alt=""></div>
-          </td>
-          <td colspan="3">
-            <div class="p-box p-sign"><img id="p_signImg" alt=""></div>
-          </td>
+          <td colspan="4"><div class="p-box"><img id="p_bankImg" alt=""></div></td>
+          <td colspan="3"><div class="p-box p-sign"><img id="p_signImg" alt=""></div></td>
         </tr>
       </table>
 
       <div class="p-footnote">
         說明：1. 本表單所有欄位若未完整填寫，將會影響您的請款流程，敬請配合。<br>
-        2. 填寫完畢後，請下載 PDF 檔案並傳送給本公司企劃人員。<br>
+        2. 填寫完畢後，請下載 PDF 檔案並傳送給企劃人員。<br>
         3. 本工具不會紀錄及搜集任何資料與圖片，重新整理頁面後，所有已填資料將會自動消失，請安心使用。
       </div>
     </div>
@@ -534,7 +523,7 @@
           if(inputId==="idFront") imgState.front = reader.result;
           if(inputId==="idBack") imgState.back = reader.result;
           if(inputId==="bankbook") imgState.bank = reader.result;
-          syncToPrint(); // keep print in sync
+          syncToPrint();
         };
         reader.readAsDataURL(f);
       });
@@ -569,15 +558,12 @@
       const e = ev.touches ? ev.touches[0] : ev;
       return { x: e.clientX - rect.left, y: e.clientY - rect.top };
     }
-
     function drawLine(a,b){
-      // simple smoothing via midpoints
       const mx = (a.x + b.x)/2;
       const my = (a.y + b.y)/2;
       ctx.quadraticCurveTo(a.x, a.y, mx, my);
       ctx.stroke();
     }
-
     function start(ev){
       ev.preventDefault();
       drawing = true;
@@ -604,8 +590,6 @@
     canvas.addEventListener("pointermove", move);
     canvas.addEventListener("pointerup", end);
     canvas.addEventListener("pointercancel", end);
-
-    // iOS fallback for older touch
     canvas.addEventListener("touchstart", start, {passive:false});
     canvas.addEventListener("touchmove", move, {passive:false});
     canvas.addEventListener("touchend", end);
@@ -629,26 +613,36 @@
 
     function recompute(){
       const gross = toNumber(grossInput.value);
-      const tax = gross >= TAX_THRESHOLD ? Math.round(gross * TAX_RATE) : 0;
-      const nhi = gross >= NHI_THRESHOLD ? Math.round(gross * NHI_RATE) : 0;
-      const net = Math.max(0, gross - tax - nhi);
+      const income = document.getElementById("incomeCategory").value;
 
-      taxEl.textContent = fmt0(tax);
+      let tax = 0;
+      let taxText = "0";
+
+      // 50 薪資 → 顯示 N/A（不計算所得稅）
+      if (income === "50 薪資所得") {
+        taxText = "N/A";
+        tax = 0;
+      } else {
+        tax = gross >= TAX_THRESHOLD ? Math.round(gross * TAX_RATE) : 0;
+        taxText = fmt0(tax);
+      }
+
+      const nhi = gross >= NHI_THRESHOLD ? Math.round(gross * NHI_RATE) : 0;
+      const net = Math.max(0, gross - (taxText === "N/A" ? 0 : tax) - nhi);
+
+      taxEl.textContent = taxText;
       nhiEl.textContent = fmt0(nhi);
       netEl.textContent = fmt0(net);
 
-      return {gross, tax, nhi, net};
+      return { gross, tax, taxText, nhi, net };
     }
 
-    grossInput.addEventListener("input", ()=>{
-      recompute();
-      syncToPrint();
-    });
-    document.getElementById("unionInsured").addEventListener("change", syncToPrint);
+    grossInput.addEventListener("input", ()=>{ recompute(); syncToPrint(); });
+    document.getElementById("incomeCategory").addEventListener("change", ()=>{ recompute(); syncToPrint(); });
 
     // ===== sync form -> print =====
     const ids = [
-      "companyName","companyContact","formDate",
+      "formDate",
       "payeeName","idNumber","contact","address","nationality",
       "projectName","serviceContent","incomeCategory",
       "bankName","bankBranch","accountName","accountNo"
@@ -661,9 +655,8 @@
     function syncToPrint(){
       const calc = recompute();
 
-      setText("p_companyName", document.getElementById("companyName").value);
-      setText("p_companyContact", document.getElementById("companyContact").value);
       setText("p_formDate", document.getElementById("formDate").value);
+      setText("p_projectName", document.getElementById("projectName").value);
 
       setText("p_payeeName", document.getElementById("payeeName").value);
       setText("p_idNumber", document.getElementById("idNumber").value);
@@ -671,36 +664,30 @@
       setText("p_address", document.getElementById("address").value);
       setText("p_nationality", document.getElementById("nationality").value);
 
-      setText("p_projectName", document.getElementById("projectName").value);
       setText("p_serviceContent", document.getElementById("serviceContent").value);
       setText("p_incomeCategory", document.getElementById("incomeCategory").value);
 
       setText("p_grossAmount", fmt0(calc.gross));
-      setText("p_taxAmt", fmt0(calc.tax));
+      setText("p_taxAmt", calc.taxText);
       setText("p_nhiAmt", fmt0(calc.nhi));
       setText("p_netAmt", fmt0(calc.net));
-
-      const union = document.getElementById("unionInsured").checked;
-      setText("p_unionBox", union ? "✔" : " ");
 
       setText("p_bankName", document.getElementById("bankName").value);
       setText("p_bankBranch", document.getElementById("bankBranch").value);
       setText("p_accountNo", document.getElementById("accountNo").value);
       setText("p_accountName", document.getElementById("accountName").value);
 
-      // images
       document.getElementById("p_frontImg").src = imgState.front || "";
       document.getElementById("p_backImg").src  = imgState.back  || "";
       document.getElementById("p_bankImg").src  = imgState.bank  || "";
       document.getElementById("p_signImg").src  = imgState.sign  || "";
     }
-    // initial sync
+
     recompute();
     syncToPrint();
 
     // ===== download PDF from printArea =====
     document.getElementById("downloadBtn").addEventListener("click", async ()=>{
-      // render printArea (table) not the form UI
       const node = document.getElementById("printArea");
 
       const canvas = await html2canvas(node, {
@@ -718,12 +705,11 @@
       const imgW = pageW;
       const imgH = canvas.height * imgW / canvas.width;
 
-      // Fit to A4 (single page) like your screenshot
       pdf.addImage(imgData, "PNG", 0, 0, imgW, Math.min(imgH, pageH));
 
+      const safe = (s)=> (s||"").replace(/[\\/:*?"<>|]/g,"_");
       const fnProject = (document.getElementById("projectName").value || "勞務報酬單").trim();
       const fnName = (document.getElementById("payeeName").value || "").trim();
-      const safe = (s)=> (s||"").replace(/[\\/:*?"<>|]/g,"_");
       pdf.save(`${safe(fnProject)}_${safe(fnName)}_勞務報酬單.pdf`);
     });
   </script>
