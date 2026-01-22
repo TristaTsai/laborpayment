@@ -27,11 +27,21 @@
 
   <p id="result"></p>
 
-  <script>
-    document.getElementById("testBtn").addEventListener("click", function () {
-      document.getElementById("result").textContent = "JS 有在跑 ✅";
-      alert("JS 有在跑 ✅");
-    });
-  </script>
+ <!-- jsPDF -->
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+<script>
+  document.getElementById("testBtn").addEventListener("click", function () {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    doc.setFontSize(16);
+    doc.text("PDF 英文測試 OK", 20, 30);
+    doc.text("This PDF is generated correctly.", 20, 45);
+
+    doc.save("step1.pdf");
+  });
+</script>
 </body>
+
 </html>
