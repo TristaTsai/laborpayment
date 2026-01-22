@@ -2,79 +2,203 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="utf-8">
-  <title>勞務報酬單（穩定輸出版）</title>
+  <title>勞務報酬單</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <style>
     body {
       font-family: system-ui, -apple-system, "Noto Sans TC", sans-serif;
+      background: #f0f0f0;
       padding: 24px;
-      background: #f5f5f5;
     }
+
     .sheet {
+      width: 794px;
       background: #fff;
-      padding: 32px;
-      max-width: 794px; /* A4 寬 */
       margin: auto;
-      box-shadow: 0 0 8px rgba(0,0,0,.1);
+      padding: 36px;
+      box-shadow: 0 0 10px rgba(0,0,0,.15);
     }
+
     h1 {
       text-align: center;
       margin-bottom: 24px;
     }
+
     .row {
+      display: flex;
+      gap: 16px;
       margin-bottom: 12px;
     }
+
+    .field {
+      flex: 1;
+    }
+
     .label {
       font-weight: 600;
+      margin-bottom: 4px;
+      display: block;
     }
-    button {
+
+    input {
+      width: 100%;
+      padding: 6px 8px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    .preview {
+      margin-top: 6px;
+      max-width: 100%;
+      max-height: 160px;
+      border: 1px solid #ccc;
+    }
+
+    canvas {
+      border: 1px solid #ccc;
+      width: 100%;
+      height: 120px;
+    }
+
+    .btn {
       margin: 24px auto;
       display: block;
       font-size: 18px;
-      padding: 12px 24px;
+      padding: 12px 28px;
     }
   </style>
 </head>
 
 <body>
 
-  <div id="pdfArea" class="sheet">
-    <h1>勞務報酬單</h1>
+<div id="pdfArea" class="sheet">
+  <h1>勞務報酬單</h1>
 
-    <div class="row"><span class="label">公司名稱：</span>東點娛樂有限公司</div>
-    <div class="row"><span class="label">專案名稱：</span>瑞鼎科技尾牙晚宴</div>
-    <div class="row"><span class="label">勞務內容：</span>禮賓接待</div>
-    <div class="row"><span class="label">所得類別：</span>9A 執行業務所得</div>
-    <div class="row"><span class="label">金額：</span>NT$ 6,000</div>
+  <div class="row">
+    <div class="field">
+      <span class="label">姓名</span>
+      <input id="name">
+    </div>
+    <div class="field">
+      <span class="label">身分證字號</span>
+      <input id="idno">
+    </div>
   </div>
 
-  <button id="downloadPdf">下載 PDF</button>
+  <div class="row">
+    <div class="field">
+      <span class="label">公司名稱</span>
+      <input id="company">
+    </div>
+    <div class="field">
+      <span class="label">專案名稱</span>
+      <input id="project">
+    </div>
+  </div>
 
-  <!-- html2canvas -->
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <!-- jsPDF -->
-  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <div class="row">
+    <div class="field">
+      <span class="label">勞務內容</span>
+      <input id="service">
+    </div>
+    <div class="field">
+      <span class="label">報酬金額</span>
+      <input id="amount">
+    </div>
+  </div>
 
-  <script>
-    document.getElementById("downloadPdf").addEventListener("click", async function () {
-      const area = document.getElementById("pdfArea");
+  <div class="row">
+    <div class="field">
+      <span class="label">銀行帳號</span>
+      <input id="bank">
+    </div>
+  </div>
 
-      const canvas = await html2canvas(area, {
-        scale: 2,
-        useCORS: true
-      });
+  <hr>
 
-      const imgData = canvas.toDataURL("image/png");
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF("p", "mm", "a4");
+  <div class="row">
+    <div class="field">
+      <span class="label">身分證正面</span>
+      <input type="file" id="idFront">
+      <img id="idFrontPreview" class="preview">
+    </div>
+    <div class="field">
+      <span class="label">身分證反面</span>
+      <input type="file" id="idBack">
+      <img id="idBackPreview" class="preview">
+    </div>
+  </div>
 
-      const pdfWidth = 210;
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+  <div class="row">
+    <div class="field">
+      <span class="label">存摺 / 帳戶影本</span>
+      <input type="file" id="bankImg">
+      <img id="bankPreview" class="preview">
+    </div>
+  </div>
 
-      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-      pdf.save("labor-form.pdf");
+  <div class="row">
+    <div class="field">
+      <span class="label">簽名</span>
+      <canvas id="sign"></canvas>
+    </div>
+  </div>
+</div>
+
+<button class="btn" id="download">下載 PDF</button>
+
+<!-- html2canvas + jsPDF -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+<script>
+  function bindPreview(inputId, imgId) {
+    document.getElementById(inputId).addEventListener("change", e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => document.getElementById(imgId).src = reader.result;
+      reader.readAsDataURL(file);
     });
-  </script>
+  }
+
+  bindPreview("idFront", "idFrontPreview");
+  bindPreview("idBack", "idBackPreview");
+  bindPreview("bankImg", "bankPreview");
+
+  // 簽名
+  const canvas = document.getElementById("sign");
+  const ctx = canvas.getContext("2d");
+  let drawing = false;
+
+  canvas.addEventListener("mousedown", () => drawing = true);
+  canvas.addEventListener("mouseup", () => drawing = false);
+  canvas.addEventListener("mousemove", e => {
+    if (!drawing) return;
+    ctx.lineWidth = 2;
+    ctx.lineTo(e.offsetX, e.offsetY);
+    ctx.stroke();
+  });
+
+  document.getElementById("download").addEventListener("click", async () => {
+    const canvasImg = await html2canvas(document.getElementById("pdfArea"), { scale: 2 });
+    const imgData = canvasImg.toDataURL("image/png");
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF("p", "mm", "a4");
+
+    const pdfWidth = 210;
+    const pdfHeight = canvasImg.height * pdfWidth / canvasImg.width;
+
+    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+
+    const filename =
+      (document.getElementById("project").value || "勞報單") + "_" +
+      (document.getElementById("name").value || "") + ".pdf";
+
+    pdf.save(filename);
+  });
+</script>
+
 </body>
 </html>
