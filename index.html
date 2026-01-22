@@ -1,325 +1,731 @@
 <!doctype html>
 <html lang="zh-Hant">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>勞務報酬單</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>勞務報酬單</title>
+  <style>
+    :root{
+      --bg:#f3f4f6;
+      --card:#fff;
+      --line:#e5e7eb;
+      --line2:#d1d5db;
+      --ink:#111827;
+      --muted:#6b7280;
+      --header:#334155;
+      --btn:#1f2937;
+      --shadow:0 6px 20px rgba(0,0,0,.08);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:var(--bg);
+      font-family: system-ui, -apple-system, "Noto Sans TC", sans-serif;
+      color:var(--ink);
+    }
+    .wrap{max-width:1100px;margin:0 auto;padding:14px;}
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:10px;
+      overflow:hidden;
+      box-shadow:var(--shadow);
+    }
+    .topbar{
+      background:var(--header);
+      color:#fff;
+      text-align:center;
+      padding:12px 10px;
+      font-weight:800;
+      letter-spacing:.5px;
+    }
+    .toprow{
+      display:grid;
+      grid-template-columns: 1.2fr 1fr 1fr;
+      gap:10px;
+      padding:12px;
+      border-bottom:1px solid var(--line);
+      align-items:center;
+    }
+    .topfield{
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
+    .topfield .lab{font-size:12px;color:var(--muted);min-width:68px;text-align:right}
+    .topfield input{
+      width:100%;
+      padding:10px 10px;
+      border:1px solid var(--line);
+      border-radius:6px;
+      font-size:14px;
+      background:#f9fafb;
+    }
 
-<style>
-:root{
-  --bg:#f4f6fb;
-  --card:#ffffff;
-  --line:#e5e7eb;
-  --ink:#111827;
-  --muted:#6b7280;
-  --brand:#2563eb;
-  --accent:#22c55e;
-}
-*{box-sizing:border-box}
+    /* form grid rows: left vertical label + content */
+    .row{
+      display:grid;
+      grid-template-columns: 76px 1fr;
+      border-bottom:1px solid var(--line);
+      min-height:56px;
+    }
+    .vtag{
+      writing-mode:vertical-rl;
+      text-orientation:upright;
+      background:#f8fafc;
+      border-right:1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:12px;
+      letter-spacing:2px;
+      color:#64748b;
+      padding:8px 0;
+    }
+    .content{padding:14px 14px;}
+    .grid2{display:grid;grid-template-columns: 120px 1fr; gap:10px; align-items:center;}
+    .grid2 .lab{font-size:13px;color:#374151;text-align:right;}
+    .grid2 input, .grid2 select{
+      width:100%;
+      padding:10px 10px;
+      border:1px solid var(--line);
+      border-radius:6px;
+      font-size:14px;
+      background:#fff;
+    }
+    .hint{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5}
+    .amountRow{
+      display:grid;
+      grid-template-columns: 120px 1fr auto;
+      gap:10px;
+      align-items:center;
+      margin-bottom:8px;
+    }
+    .amountRow .unit{color:var(--muted);font-size:14px;}
+    .calc{
+      font-size:13px;color:#374151;line-height:1.8;
+      margin-top:8px;
+    }
+    .calc .sumline{
+      display:flex;gap:10px;align-items:center;justify-content:flex-start;
+      font-weight:800;margin-top:6px;
+    }
+    .checkline{
+      display:flex;gap:10px;align-items:center;justify-content:flex-end;
+      margin-top:6px;color:#374151;font-size:13px;
+    }
 
-body{
-  margin:0;
-  background:var(--bg);
-  font-family: system-ui,-apple-system,"Noto Sans TC",sans-serif;
-  color:var(--ink);
-  padding:20px;
-}
-.container{max-width:1200px;margin:auto}
-.layout{
-  display:grid;
-  grid-template-columns:420px 1fr;
-  gap:16px;
-}
-@media(max-width:980px){.layout{grid-template-columns:1fr}}
+    /* upload boxes */
+    .uploads2{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin-top:6px;
+    }
+    .uploadBox{
+      border:2px dashed var(--line2);
+      border-radius:10px;
+      height:140px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      position:relative;
+      overflow:hidden;
+      background:#fafafa;
+      cursor:pointer;
+    }
+    .uploadBox .txt{
+      text-align:center;
+      color:#6b7280;
+      font-size:13px;
+      line-height:1.4;
+    }
+    .uploadBox img{
+      position:absolute; inset:0;
+      width:100%; height:100%;
+      object-fit:contain;
+      background:#fff;
+    }
+    .uploadBox input{display:none}
 
-.panel{
-  background:var(--card);
-  border-radius:14px;
-  border:1px solid var(--line);
-  box-shadow:0 8px 20px rgba(0,0,0,.06);
-  overflow:hidden;
-}
-.panel .hd{
-  padding:14px 16px;
-  background:linear-gradient(90deg,rgba(37,99,235,.15),rgba(34,197,94,.15));
-  font-weight:800;
-}
-.panel .bd{padding:16px}
+    .uploadSingle{margin-top:10px}
+    .uploadSingle .uploadBox{height:160px}
 
-.section{margin-bottom:18px}
-.section h3{
-  margin:0 0 10px;
-  font-size:13px;
-  font-weight:800;
-  display:flex;align-items:center;gap:6px;
-}
-.section h3::before{
-  content:"";
-  width:10px;height:10px;border-radius:3px;
-  background:var(--brand);
-}
+    /* signature */
+    .signBox{
+      border:2px dashed var(--line2);
+      border-radius:10px;
+      padding:10px;
+      background:#fafafa;
+    }
+    canvas{
+      width:100%;
+      height:180px;
+      background:#fff;
+      border-radius:8px;
+      border:1px solid var(--line);
+      touch-action:none;
+      display:block;
+    }
+    .signTools{
+      display:flex; gap:10px; justify-content:flex-end; margin-top:10px;
+    }
+    .miniBtn{
+      border:1px solid var(--line2);
+      background:#fff;
+      border-radius:8px;
+      padding:8px 12px;
+      font-weight:700;
+      cursor:pointer;
+    }
 
-label{
-  display:block;
-  font-size:12px;
-  font-weight:700;
-  margin:10px 0 6px;
-}
-input,select{
-  width:100%;
-  padding:10px 11px;
-  border-radius:10px;
-  border:1px solid var(--line);
-  font-size:15px;
-}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+    .footer{
+      padding:14px;
+    }
+    .notice{
+      font-size:12px;color:#4b5563;line-height:1.7;margin-bottom:12px;
+    }
+    .downloadBtn{
+      width:100%;
+      background:#1f2937;
+      color:#fff;
+      border:0;
+      border-radius:10px;
+      padding:14px 14px;
+      font-size:16px;
+      font-weight:900;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+    }
 
-.preview{
-  margin-top:6px;
-  max-width:100%;
-  max-height:160px;
-  border:1px solid var(--line);
-  border-radius:8px;
-  object-fit:contain;
-}
+    /* ===== PDF printable area ===== */
+    #printArea{
+      width: 794px; /* A4 px at 96dpi-ish */
+      background:#fff;
+      color:#111;
+      padding:0;
+      border:1px solid #000;
+      font-family: system-ui, -apple-system, "Noto Sans TC", sans-serif;
+    }
+    .p-title{
+      text-align:center;
+      font-weight:900;
+      font-size:20px;
+      padding:10px 8px;
+      border-bottom:1px solid #000;
+    }
+    .p-table{
+      width:100%;
+      border-collapse:collapse;
+      table-layout:fixed;
+      font-size:12px;
+    }
+    .p-table td, .p-table th{
+      border:1px solid #000;
+      padding:6px 6px;
+      vertical-align:middle;
+      word-break:break-word;
+    }
+    .p-muted{color:#111;}
+    .p-center{text-align:center}
+    .p-right{text-align:right}
+    .p-bold{font-weight:800}
+    .p-box{
+      border:1px dashed #777;
+      height:150px;
+      display:flex;align-items:center;justify-content:center;
+      overflow:hidden;
+    }
+    .p-box img{max-width:100%;max-height:100%;object-fit:contain}
+    .p-sign{height:150px}
+    .p-footnote{
+      font-size:11px;
+      padding:10px;
+      border-top:1px solid #000;
+      line-height:1.6;
+    }
 
-/* ===== A4 預覽 ===== */
-.sheet{
-  background:#fff;
-  width:794px;
-  min-height:1123px;
-  margin:auto;
-  padding:36px;
-  border:1px solid var(--line);
-  box-shadow:0 0 10px rgba(0,0,0,.1);
-}
-.sheet .titleWrap{text-align:center;margin-bottom:28px}
-.sheet .titleWrap .corp{
-  font-size:20px;
-  font-weight:800;
-  letter-spacing:1px;
-}
-.sheet .titleWrap .doc{
-  font-size:28px;
-  font-weight:900;
-  letter-spacing:2px;
-  margin-top:6px;
-}
-
-.item{margin-bottom:10px;font-size:15px}
-.label{font-weight:800}
-
-.images{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-  margin-top:14px;
-}
-.images img{
-  width:100%;
-  max-height:220px;
-  border:1px solid var(--line);
-  object-fit:contain;
-}
-
-/* ===== 簽名 ===== */
-canvas{
-  width:100%;
-  height:160px;
-  border:1px solid var(--line);
-  border-radius:8px;
-  touch-action:none;
-}
-
-.actions{text-align:center;margin-top:16px}
-button{
-  font-size:18px;
-  font-weight:800;
-  padding:12px 28px;
-  border-radius:14px;
-  border:none;
-  cursor:pointer;
-  background:var(--brand);
-  color:#fff;
-}
-</style>
+    /* mobile tweak */
+    @media (max-width: 520px){
+      .toprow{grid-template-columns:1fr; gap:8px}
+      .row{grid-template-columns:64px 1fr}
+      .grid2{grid-template-columns:100px 1fr}
+      .uploads2{grid-template-columns:1fr 1fr}
+    }
+  </style>
 </head>
 
 <body>
-<div class="container">
-  <div class="layout">
+  <div class="wrap">
+    <div class="card">
+      <div class="topbar">勞務報酬單</div>
 
-    <!-- 左：填寫 -->
-    <div class="panel">
-      <div class="hd">填寫資料</div>
-      <div class="bd">
+      <!-- header fields -->
+      <div class="toprow">
+        <div class="topfield">
+          <div class="lab">公司名稱</div>
+          <input id="companyName" placeholder="" />
+        </div>
+        <div class="topfield">
+          <div class="lab">聯絡電話</div>
+          <input id="companyContact" placeholder="" />
+        </div>
+        <div class="topfield">
+          <div class="lab">製表日期</div>
+          <input id="formDate" type="date" />
+        </div>
+      </div>
 
-        <div class="section">
-          <h3>基本資料</h3>
-          <label>填表日期</label>
-          <input type="date" id="date">
+      <!-- 基本資料 -->
+      <div class="row">
+        <div class="vtag">領款人基本資料</div>
+        <div class="content">
+          <div class="grid2"><div class="lab">姓名</div><input id="payeeName" placeholder="請輸入姓名"></div>
+          <div class="grid2"><div class="lab">身分證字號</div><input id="idNumber" placeholder="請輸入身分證字號或居留證證號"></div>
+          <div class="grid2"><div class="lab">聯絡方式</div><input id="contact" placeholder="請輸入聯絡方式（Email 或電話）"></div>
+          <div class="grid2"><div class="lab">戶籍地址</div><input id="address" placeholder="請輸入戶籍地址"></div>
+          <div class="grid2"><div class="lab">國籍</div><input id="nationality" placeholder="" value="臺灣"></div>
+        </div>
+      </div>
 
-          <div class="row2">
-            <div>
-              <label>姓名</label>
-              <input id="name">
+      <!-- 專案資訊 -->
+      <div class="row">
+        <div class="vtag">專案資訊</div>
+        <div class="content">
+          <div class="grid2"><div class="lab">專案名稱</div><input id="projectName" placeholder=""></div>
+          <div class="grid2"><div class="lab">勞務內容</div><input id="serviceContent" placeholder=""></div>
+          <div class="grid2">
+            <div class="lab">所得類別</div>
+            <select id="incomeCategory">
+              <option value="9A 執行業務所得">9A 執行業務所得</option>
+              <option value="50 薪資所得">50 薪資所得</option>
+              <option value="其他">其他</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- 金額 -->
+      <div class="row">
+        <div class="vtag">金額</div>
+        <div class="content">
+          <div class="amountRow">
+            <div class="lab" style="text-align:right;font-weight:700;color:#374151;">應付總額：</div>
+            <input id="grossAmount" inputmode="numeric" placeholder="" />
+            <div class="unit">元</div>
+          </div>
+
+          <div class="calc">
+            <div>－ 代扣繳所得稅：<span class="p-muted">（達 20,010 元，代扣繳 10%）</span>：<span id="taxAmt">0</span> 元</div>
+            <div>－ 二代健保補充保費：<span class="p-muted">（達 20,000 元，代扣繳 2.11%）</span>：<span id="nhiAmt">0</span> 元
+              <span style="float:right; font-size:13px;">
+                <label style="display:inline-flex; gap:6px; align-items:center; font-weight:700; margin:0;">
+                  <input id="unionInsured" type="checkbox" style="width:16px;height:16px;">
+                  領款人有投保工會
+                </label>
+              </span>
             </div>
-            <div>
-              <label>身分證字號</label>
-              <input id="idno">
+            <div class="sumline">
+              <div style="width:18px;text-align:center;">＝</div>
+              <div>應付淨額：<span id="netAmt">0</span> 元</div>
             </div>
           </div>
         </div>
+      </div>
 
-        <div class="section">
-          <h3>專案與所得</h3>
-          <label>公司名稱</label>
-          <input id="company">
+      <!-- 身分證件 -->
+      <div class="row">
+        <div class="vtag">領款人身分證件</div>
+        <div class="content">
+          <div class="uploads2">
+            <label class="uploadBox" id="boxFront">
+              <input id="idFront" type="file" accept="image/*">
+              <div class="txt"><div style="font-weight:800;">正面</div>點擊上傳圖片</div>
+              <img id="frontPreview" alt="" />
+            </label>
+            <label class="uploadBox" id="boxBack">
+              <input id="idBack" type="file" accept="image/*">
+              <div class="txt"><div style="font-weight:800;">反面</div>點擊上傳圖片</div>
+              <img id="backPreview" alt="" />
+            </label>
+          </div>
+        </div>
+      </div>
 
-          <label>專案名稱</label>
-          <input id="project">
+      <!-- 付款方式 -->
+      <div class="row">
+        <div class="vtag">付款方式</div>
+        <div class="content">
+          <div class="grid2"><div class="lab">銀行</div><input id="bankName" placeholder="請輸入銀行名稱"></div>
+          <div class="grid2"><div class="lab">分行</div><input id="bankBranch" placeholder="請輸入分行名稱"></div>
+          <div class="grid2"><div class="lab">戶名</div><input id="accountName" placeholder="請輸入戶名"></div>
+          <div class="grid2"><div class="lab">帳號</div><input id="accountNo" placeholder="請輸入帳號"></div>
 
-          <label>勞務內容</label>
-          <input id="service">
+          <div class="uploadSingle">
+            <label class="uploadBox">
+              <input id="bankbook" type="file" accept="image/*">
+              <div class="txt"><div style="font-weight:800;">帳戶影本</div>點擊上傳帳戶封面影本</div>
+              <img id="bankPreview" alt="" />
+            </label>
+          </div>
+        </div>
+      </div>
 
-          <div class="row2">
-            <div>
-              <label>所得類別</label>
-              <select id="income">
-                <option value=""></option>
-                <option>9A 執行業務所得</option>
-                <option>50 薪資所得</option>
-              </select>
-            </div>
-            <div>
-              <label>報酬金額</label>
-              <input id="amount">
+      <!-- 簽名 -->
+      <div class="row" style="border-bottom:none;">
+        <div class="vtag">簽名</div>
+        <div class="content">
+          <div class="signBox">
+            <div style="text-align:center;color:#6b7280;font-weight:800;margin-bottom:10px;">領款人簽名（惠請手寫簽名）</div>
+            <canvas id="signCanvas"></canvas>
+            <div class="signTools">
+              <button class="miniBtn" id="clearSign" type="button">清除</button>
             </div>
           </div>
         </div>
+      </div>
 
-        <div class="section">
-          <h3>匯款資料</h3>
-          <label>銀行名稱</label>
-          <input id="bank">
-
-          <div class="row3">
-            <div>
-              <label>分行</label>
-              <input id="branch">
-            </div>
-            <div>
-              <label>帳號</label>
-              <input id="account">
-            </div>
-            <div>
-              <label>戶名</label>
-              <input id="holder">
-            </div>
-          </div>
+      <div class="footer">
+        <div class="notice">
+          說明：<br>
+          1. 本表單所有欄位若未完整填寫，將會影響您的請款流程，敬請配合。<br>
+          2. 填寫完畢後，請下載 PDF 檔案並傳送給本公司企劃人員。<br>
+          3. 本工具不會紀錄及搜集任何資料與圖片，重新整理頁面後，所有已填資料將會自動消失，請安心使用。
         </div>
-
-        <div class="section">
-          <h3>上傳附件（即時預覽）</h3>
-          <label>身分證正面</label>
-          <input type="file" id="idFront"><img id="idFrontP" class="preview">
-          <label>身分證反面</label>
-          <input type="file" id="idBack"><img id="idBackP" class="preview">
-          <label>存摺 / 帳戶影本</label>
-          <input type="file" id="bankImg"><img id="bankImgP" class="preview">
-        </div>
-
-        <div class="section">
-          <h3>簽名</h3>
-          <canvas id="sign"></canvas>
-        </div>
-
+        <button id="downloadBtn" class="downloadBtn" type="button">下載勞務報酬單 ⬇︎</button>
       </div>
     </div>
+  </div>
 
-    <!-- 右：A4 預覽 -->
-    <div class="sheet" id="pdfArea">
-      <div class="titleWrap">
-        <div class="corp">三壐國際整合行銷</div>
-        <div class="doc">勞務報酬單</div>
-      </div>
+  <!-- Hidden printable area for PDF (matches your 3rd image style) -->
+  <div style="position:absolute; left:-99999px; top:-99999px;">
+    <div id="printArea">
+      <div class="p-title">勞務報酬單</div>
+      <table class="p-table">
+        <tr>
+          <td colspan="3"><span class="p-bold">公司名稱：</span><span id="p_companyName"></span></td>
+          <td colspan="2"><span class="p-bold">公司聯絡方式：</span><span id="p_companyContact"></span></td>
+          <td colspan="2"><span class="p-bold">製表日期：</span><span id="p_formDate"></span></td>
+        </tr>
 
-      <div class="item"><span class="label">填表日期：</span><span id="v_date"></span></div>
-      <div class="item"><span class="label">姓名：</span><span id="v_name"></span></div>
-      <div class="item"><span class="label">身分證字號：</span><span id="v_idno"></span></div>
-      <div class="item"><span class="label">公司名稱：</span><span id="v_company"></span></div>
-      <div class="item"><span class="label">專案名稱：</span><span id="v_project"></span></div>
-      <div class="item"><span class="label">勞務內容：</span><span id="v_service"></span></div>
-      <div class="item"><span class="label">所得類別：</span><span id="v_income"></span></div>
-      <div class="item"><span class="label">報酬金額：</span><span id="v_amount"></span></div>
-      <div class="item"><span class="label">銀行：</span><span id="v_bank"></span></div>
-      <div class="item"><span class="label">分行：</span><span id="v_branch"></span></div>
-      <div class="item"><span class="label">帳號：</span><span id="v_account"></span></div>
-      <div class="item"><span class="label">戶名：</span><span id="v_holder"></span></div>
+        <tr>
+          <td rowspan="4" class="p-center p-bold" style="width:70px;">領<br>款<br>人<br>基<br>本<br>資<br>料</td>
+          <td class="p-center p-bold" style="width:80px;">姓名</td>
+          <td colspan="2" id="p_payeeName"></td>
+          <td class="p-center p-bold" style="width:80px;">國籍</td>
+          <td colspan="2" id="p_nationality"></td>
+        </tr>
+        <tr>
+          <td class="p-center p-bold">身分證字號</td>
+          <td colspan="2" id="p_idNumber"></td>
+          <td class="p-center p-bold">聯絡方式</td>
+          <td colspan="2" id="p_contact"></td>
+        </tr>
+        <tr>
+          <td class="p-center p-bold">戶籍地址</td>
+          <td colspan="5" id="p_address"></td>
+        </tr>
+        <tr>
+          <td class="p-center p-bold">勞務內容</td>
+          <td colspan="2" id="p_serviceContent"></td>
+          <td class="p-center p-bold">所得類別</td>
+          <td colspan="2" id="p_incomeCategory"></td>
+        </tr>
 
-      <div class="images">
-        <img id="v_idFront">
-        <img id="v_idBack">
-        <img id="v_bankImg">
-        <img id="v_sign">
+        <tr>
+          <td rowspan="3" class="p-center p-bold">金<br>額</td>
+          <td class="p-center p-bold" colspan="2">應付總額：</td>
+          <td colspan="4"><span id="p_grossAmount"></span> 元</td>
+        </tr>
+        <tr>
+          <td colspan="6">
+            － 代扣繳所得稅： <span id="p_taxAmt"></span> 元<br>
+            － 二代健保補充保費： <span id="p_nhiAmt"></span> 元
+            <span style="float:right;">[ <span id="p_unionBox"></span> ] 領款人有投保工會</span>
+            <div style="margin-top:6px;font-weight:900;">＝ 應付淨額： <span id="p_netAmt"></span> 元</div>
+          </td>
+        </tr>
+
+        <tr>
+          <td colspan="6" class="p-bold">專案名稱： <span id="p_projectName" style="font-weight:700;"></span></td>
+        </tr>
+
+        <tr>
+          <td rowspan="2" class="p-center p-bold">領<br>款<br>人<br>身<br>分<br>證<br>件</td>
+          <td colspan="3" class="p-center p-bold">正面</td>
+          <td colspan="3" class="p-center p-bold">反面</td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <div class="p-box"><img id="p_frontImg" alt=""></div>
+          </td>
+          <td colspan="3">
+            <div class="p-box"><img id="p_backImg" alt=""></div>
+          </td>
+        </tr>
+
+        <tr>
+          <td class="p-center p-bold">付<br>款<br>方<br>式</td>
+          <td colspan="6">
+            透過銀行轉帳/匯款，領款人帳戶資訊<br>
+            銀行：<span id="p_bankName"></span>　分行：<span id="p_bankBranch"></span>　帳號：<span id="p_accountNo"></span>　戶名：<span id="p_accountName"></span>
+          </td>
+        </tr>
+
+        <tr>
+          <td class="p-center p-bold" colspan="4">帳戶影本</td>
+          <td class="p-center p-bold" colspan="3">領款人簽名</td>
+        </tr>
+        <tr>
+          <td colspan="4">
+            <div class="p-box"><img id="p_bankImg" alt=""></div>
+          </td>
+          <td colspan="3">
+            <div class="p-box p-sign"><img id="p_signImg" alt=""></div>
+          </td>
+        </tr>
+      </table>
+
+      <div class="p-footnote">
+        說明：1. 本表單所有欄位若未完整填寫，將會影響您的請款流程，敬請配合。<br>
+        2. 填寫完畢後，請下載 PDF 檔案並傳送給本公司企劃人員。<br>
+        3. 本工具不會紀錄及搜集任何資料與圖片，重新整理頁面後，所有已填資料將會自動消失，請安心使用。
       </div>
     </div>
-
   </div>
 
-  <div class="actions">
-    <button id="download">下載 PDF</button>
-  </div>
-</div>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script>
+    // ===== date default today (local) =====
+    (function initDate(){
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth()+1).padStart(2,'0');
+      const dd = String(d.getDate()).padStart(2,'0');
+      document.getElementById('formDate').value = `${yyyy}-${mm}-${dd}`;
+    })();
 
-<script>
-/* 今日日期預設 */
-const today = new Date().toISOString().slice(0,10);
-date.value = today; v_date.textContent = today;
+    // ===== helpers =====
+    function toNumber(s){
+      const n = Number(String(s||"").replace(/[^\d.]/g,''));
+      return Number.isFinite(n) ? n : 0;
+    }
+    function fmt0(n){ return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+    function setText(id, v){ document.getElementById(id).textContent = v || ""; }
 
-/* 即時同步文字 */
-["name","idno","company","project","service","income","amount","bank","branch","account","holder"]
-.forEach(id=>{
-  document.getElementById(id).addEventListener("input",e=>{
-    document.getElementById("v_"+id).textContent = e.target.value;
-  });
-});
+    // ===== image preview + store =====
+    const imgState = { front:"", back:"", bank:"", sign:"" };
 
-/* 圖片即時預覽 */
-function bindImg(input, preview, viewer){
-  input.onchange = e=>{
-    const f=e.target.files[0]; if(!f) return;
-    const r=new FileReader();
-    r.onload=()=>{preview.src=r.result; viewer.src=r.result;}
-    r.readAsDataURL(f);
-  }
-}
-bindImg(idFront,idFrontP,v_idFront);
-bindImg(idBack,idBackP,v_idBack);
-bindImg(bankImg,bankImgP,v_bankImg);
+    function bindImage(inputId, imgId){
+      const input = document.getElementById(inputId);
+      const img = document.getElementById(imgId);
+      input.addEventListener('change', e=>{
+        const f = e.target.files && e.target.files[0];
+        if(!f) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          img.src = reader.result;
+          img.style.display = "block";
+          if(inputId==="idFront") imgState.front = reader.result;
+          if(inputId==="idBack") imgState.back = reader.result;
+          if(inputId==="bankbook") imgState.bank = reader.result;
+          syncToPrint(); // keep print in sync
+        };
+        reader.readAsDataURL(f);
+      });
+    }
+    bindImage("idFront","frontPreview");
+    bindImage("idBack","backPreview");
+    bindImage("bankbook","bankPreview");
 
-/* 簽名（平滑、支援手機） */
-const c=sign,ctx=c.getContext("2d");
-let d=false;
-function pos(e){return e.touches?{x:e.touches[0].clientX-c.getBoundingClientRect().left,y:e.touches[0].clientY-c.getBoundingClientRect().top}:{x:e.offsetX,y:e.offsetY}}
-["mousedown","touchstart"].forEach(ev=>c.addEventListener(ev,e=>{d=true;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y)}));
-["mousemove","touchmove"].forEach(ev=>c.addEventListener(ev,e=>{if(!d)return;const p=pos(e);ctx.lineWidth=2;ctx.lineCap="round";ctx.lineTo(p.x,p.y);ctx.stroke()}));
-["mouseup","mouseleave","touchend"].forEach(ev=>c.addEventListener(ev,()=>{d=false;v_sign.src=c.toDataURL()}));
+    // ===== smooth signature (pointer events) =====
+    const canvas = document.getElementById("signCanvas");
+    const ctx = canvas.getContext("2d");
 
-/* 下載 PDF */
-download.onclick=async()=>{
-  const canvas=await html2canvas(pdfArea,{scale:2});
-  const img=canvas.toDataURL("image/png");
-  const {jsPDF}=window.jspdf;
-  const pdf=new jsPDF("p","mm","a4");
-  const w=210,h=canvas.height*w/canvas.width;
-  pdf.addImage(img,"PNG",0,0,w,h);
-  pdf.save((project.value||"勞務報酬單")+"_"+(name.value||"")+".pdf");
-}
-</script>
+    function resizeCanvas(){
+      const ratio = Math.max(window.devicePixelRatio || 1, 1);
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.floor(rect.width * ratio);
+      canvas.height = Math.floor(rect.height * ratio);
+      ctx.setTransform(ratio,0,0,ratio,0,0);
+      ctx.lineWidth = 2.4;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.strokeStyle = "#111";
+    }
+    window.addEventListener("resize", resizeCanvas);
+    setTimeout(resizeCanvas, 0);
+
+    let drawing = false;
+    let last = null;
+
+    function getPoint(ev){
+      const rect = canvas.getBoundingClientRect();
+      const e = ev.touches ? ev.touches[0] : ev;
+      return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    }
+
+    function drawLine(a,b){
+      // simple smoothing via midpoints
+      const mx = (a.x + b.x)/2;
+      const my = (a.y + b.y)/2;
+      ctx.quadraticCurveTo(a.x, a.y, mx, my);
+      ctx.stroke();
+    }
+
+    function start(ev){
+      ev.preventDefault();
+      drawing = true;
+      last = getPoint(ev);
+      ctx.beginPath();
+      ctx.moveTo(last.x, last.y);
+    }
+    function move(ev){
+      if(!drawing) return;
+      ev.preventDefault();
+      const p = getPoint(ev);
+      drawLine(last, p);
+      last = p;
+    }
+    function end(){
+      if(!drawing) return;
+      drawing = false;
+      last = null;
+      imgState.sign = canvas.toDataURL("image/png");
+      syncToPrint();
+    }
+
+    canvas.addEventListener("pointerdown", start);
+    canvas.addEventListener("pointermove", move);
+    canvas.addEventListener("pointerup", end);
+    canvas.addEventListener("pointercancel", end);
+
+    // iOS fallback for older touch
+    canvas.addEventListener("touchstart", start, {passive:false});
+    canvas.addEventListener("touchmove", move, {passive:false});
+    canvas.addEventListener("touchend", end);
+
+    document.getElementById("clearSign").addEventListener("click", ()=>{
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      imgState.sign = "";
+      syncToPrint();
+    });
+
+    // ===== calc =====
+    const grossInput = document.getElementById("grossAmount");
+    const taxEl = document.getElementById("taxAmt");
+    const nhiEl = document.getElementById("nhiAmt");
+    const netEl = document.getElementById("netAmt");
+
+    const TAX_THRESHOLD = 20010;
+    const TAX_RATE = 0.10;
+    const NHI_THRESHOLD = 20000;
+    const NHI_RATE = 0.0211;
+
+    function recompute(){
+      const gross = toNumber(grossInput.value);
+      const tax = gross >= TAX_THRESHOLD ? Math.round(gross * TAX_RATE) : 0;
+      const nhi = gross >= NHI_THRESHOLD ? Math.round(gross * NHI_RATE) : 0;
+      const net = Math.max(0, gross - tax - nhi);
+
+      taxEl.textContent = fmt0(tax);
+      nhiEl.textContent = fmt0(nhi);
+      netEl.textContent = fmt0(net);
+
+      return {gross, tax, nhi, net};
+    }
+
+    grossInput.addEventListener("input", ()=>{
+      recompute();
+      syncToPrint();
+    });
+    document.getElementById("unionInsured").addEventListener("change", syncToPrint);
+
+    // ===== sync form -> print =====
+    const ids = [
+      "companyName","companyContact","formDate",
+      "payeeName","idNumber","contact","address","nationality",
+      "projectName","serviceContent","incomeCategory",
+      "bankName","bankBranch","accountName","accountNo"
+    ];
+    ids.forEach(id=>{
+      document.getElementById(id).addEventListener("input", syncToPrint);
+      document.getElementById(id).addEventListener("change", syncToPrint);
+    });
+
+    function syncToPrint(){
+      const calc = recompute();
+
+      setText("p_companyName", document.getElementById("companyName").value);
+      setText("p_companyContact", document.getElementById("companyContact").value);
+      setText("p_formDate", document.getElementById("formDate").value);
+
+      setText("p_payeeName", document.getElementById("payeeName").value);
+      setText("p_idNumber", document.getElementById("idNumber").value);
+      setText("p_contact", document.getElementById("contact").value);
+      setText("p_address", document.getElementById("address").value);
+      setText("p_nationality", document.getElementById("nationality").value);
+
+      setText("p_projectName", document.getElementById("projectName").value);
+      setText("p_serviceContent", document.getElementById("serviceContent").value);
+      setText("p_incomeCategory", document.getElementById("incomeCategory").value);
+
+      setText("p_grossAmount", fmt0(calc.gross));
+      setText("p_taxAmt", fmt0(calc.tax));
+      setText("p_nhiAmt", fmt0(calc.nhi));
+      setText("p_netAmt", fmt0(calc.net));
+
+      const union = document.getElementById("unionInsured").checked;
+      setText("p_unionBox", union ? "✔" : " ");
+
+      setText("p_bankName", document.getElementById("bankName").value);
+      setText("p_bankBranch", document.getElementById("bankBranch").value);
+      setText("p_accountNo", document.getElementById("accountNo").value);
+      setText("p_accountName", document.getElementById("accountName").value);
+
+      // images
+      document.getElementById("p_frontImg").src = imgState.front || "";
+      document.getElementById("p_backImg").src  = imgState.back  || "";
+      document.getElementById("p_bankImg").src  = imgState.bank  || "";
+      document.getElementById("p_signImg").src  = imgState.sign  || "";
+    }
+    // initial sync
+    recompute();
+    syncToPrint();
+
+    // ===== download PDF from printArea =====
+    document.getElementById("downloadBtn").addEventListener("click", async ()=>{
+      // render printArea (table) not the form UI
+      const node = document.getElementById("printArea");
+
+      const canvas = await html2canvas(node, {
+        scale: 2,
+        backgroundColor: "#ffffff",
+        useCORS: true
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF("p","mm","a4");
+
+      const pageW = 210;
+      const pageH = 297;
+      const imgW = pageW;
+      const imgH = canvas.height * imgW / canvas.width;
+
+      // Fit to A4 (single page) like your screenshot
+      pdf.addImage(imgData, "PNG", 0, 0, imgW, Math.min(imgH, pageH));
+
+      const fnProject = (document.getElementById("projectName").value || "勞務報酬單").trim();
+      const fnName = (document.getElementById("payeeName").value || "").trim();
+      const safe = (s)=> (s||"").replace(/[\\/:*?"<>|]/g,"_");
+      pdf.save(`${safe(fnProject)}_${safe(fnName)}_勞務報酬單.pdf`);
+    });
+  </script>
 </body>
 </html>
