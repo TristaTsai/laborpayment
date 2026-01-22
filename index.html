@@ -1,58 +1,114 @@
-<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-<script>
-  // ====== PDF 中文不亂碼：每個 doc 都要註冊字體（抓字體只做一次）======
-  let __fontBase64 = null;
-  let __fontFetchPromise = null;
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <title>PDF 中文測試（最終穩定版）</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  function __arrayBufferToBase64(buffer) {
-    let binary = "";
-    const bytes = new Uint8Array(buffer);
-    const chunkSize = 0x8000;
-    for (let i = 0; i < bytes.length; i += chunkSize) {
-      const chunk = bytes.subarray(i, i + chunkSize);
-      binary += String.fromCharCode.apply(null, chunk);
+  <style>
+    body {
+      font-family: system-ui, -apple-system, "Noto Sans TC", sans-serif;
+      padding: 32px;
+      line-height: 1.6;
     }
-    return btoa(binary);
-  }
+    h1 {
+      margin-bottom: 16px;
+    }
+    button {
+      font-size: 18px;
+      padding: 12px 24px;
+      cursor: pointer;
+    }
+    .hint {
+      margin-top: 16px;
+      font-size: 14px;
+      color: #555;
+    }
+  </style>
+</head>
 
-  async function ensureChineseFont(doc) {
-    if (!__fontBase64) {
-      if (!__fontFetchPromise) {
-        __fontFetchPromise = (async () => {
-          const res = await fetch("./fonts/NotoSansTC-Regular.ttf", { cache: "no-store" });
-          if (!res.ok) throw new Error("字體載入失敗：找不到 ./fonts/NotoSansTC-Regular.ttf");
-          const buf = await res.arrayBuffer();
-          __fontBase64 = __arrayBufferToBase64(buf);
-        })();
+<body>
+  <h1>PDF 中文測試（最終穩定版）</h1>
+
+  <button id="downloadPdf">下載 PDF</button>
+
+  <div class="hint">
+    點擊後會下載 <code>test.pdf</code><br>
+    若 PDF 內中文正常顯示，代表整個流程成功。
+  </div>
+
+  <!-- jsPDF（穩定版 CDN） -->
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+  <script>
+    /********************************************************
+     * Safari / iOS / GitHub Pages 安全的 base64 轉換
+     ********************************************************/
+    function arrayBufferToBase64(buffer) {
+      var binary = "";
+      var bytes = new Uint8Array(buffer);
+      var len = bytes.length;
+      for (var i = 0; i < len; i++) {
+        binary += String.fromCharCode(bytes[i]);
       }
-      await __fontFetchPromise;
+      return btoa(binary);
     }
 
-    doc.addFileToVFS("NotoSansTC-Regular.ttf", __fontBase64);
-    doc.addFont("NotoSansTC-Regular.ttf", "NotoSansTC", "normal");
-    doc.setFont("NotoSansTC", "normal");
-  }
+    var fontBase64 = null;
 
-  // ====== 綁定下載按鈕（測試版，確保一定有反應）======
-  const btn = document.getElementById("downloadPdf");
-  if (btn) {
-    btn.addEventListener("click", async () => {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({ unit: "mm", format: "a4" });
+    async function loadChineseFont() {
+      if (fontBase64) return;
 
-      try {
-        await ensureChineseFont(doc);
-      } catch (e) {
-        // 字體真的載不到，至少還能下載（但中文可能會壞）
-        doc.setFont("helvetica", "normal");
+      var response = await fetch("./fonts/NotoSansTC-Regular.ttf", {
+        cache: "no-store"
+      });
+
+      if (!response.ok) {
+        alert("❌ 找不到 fonts/NotoSansTC-Regular.ttf\n請確認字體檔已上傳");
+        throw new Error("Font not found");
       }
 
-      doc.setFontSize(16);
-      doc.text("測試中文：勞務報酬單", 20, 30);
-      doc.setFontSize(12);
-      doc.text("如果你看到這行中文正常，代表字體嵌入成功。", 20, 45);
+      var buffer = await response.arrayBuffer();
+      fontBase64 = arrayBufferToBase64(buffer);
+    }
 
-      doc.save("test.pdf");
+    /********************************************************
+     * DOM 載入完成後再綁定按鈕（避免空白頁）
+     ********************************************************/
+    document.addEventListener("DOMContentLoaded", function () {
+      var btn = document.getElementById("downloadPdf");
+
+      btn.addEventListener("click", async function () {
+        var jsPDF = window.jspdf.jsPDF;
+        var doc = new jsPDF({
+          unit: "mm",
+          format: "a4"
+        });
+
+        try {
+          await loadChineseFont();
+
+          // ⚠️ 每一個 jsPDF 實例都要重新註冊字體
+          doc.addFileToVFS("NotoSansTC-Regular.ttf", fontBase64);
+          doc.addFont("NotoSansTC-Regular.ttf", "NotoSansTC", "normal");
+          doc.setFont("NotoSansTC", "normal");
+        } catch (e) {
+          // 字體真的失敗時，至少不要整個壞掉
+          doc.setFont("helvetica", "normal");
+        }
+
+        // ===== 寫入測試內容 =====
+        doc.setFontSize(18);
+        doc.text("測試中文成功", 20, 40);
+
+        doc.setFontSize(14);
+        doc.text("勞務報酬單 PDF 中文顯示正常", 20, 60);
+        doc.text("公司名稱：東點娛樂有限公司", 20, 75);
+        doc.text("專案名稱：瑞鼎科技尾牙晚宴", 20, 90);
+
+        doc.save("test.pdf");
+      });
     });
-  }
-</script>
+  </script>
+</body>
+</html>
