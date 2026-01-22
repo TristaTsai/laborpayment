@@ -1,204 +1,325 @@
 <!doctype html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="utf-8">
-  <title>勞務報酬單</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>勞務報酬單</title>
 
-  <style>
-    body {
-      font-family: system-ui, -apple-system, "Noto Sans TC", sans-serif;
-      background: #f0f0f0;
-      padding: 24px;
-    }
+<style>
+:root{
+  --bg:#f4f6fb;
+  --card:#ffffff;
+  --line:#e5e7eb;
+  --ink:#111827;
+  --muted:#6b7280;
+  --brand:#2563eb;
+  --accent:#22c55e;
+}
+*{box-sizing:border-box}
 
-    .sheet {
-      width: 794px;
-      background: #fff;
-      margin: auto;
-      padding: 36px;
-      box-shadow: 0 0 10px rgba(0,0,0,.15);
-    }
+body{
+  margin:0;
+  background:var(--bg);
+  font-family: system-ui,-apple-system,"Noto Sans TC",sans-serif;
+  color:var(--ink);
+  padding:20px;
+}
+.container{max-width:1200px;margin:auto}
+.layout{
+  display:grid;
+  grid-template-columns:420px 1fr;
+  gap:16px;
+}
+@media(max-width:980px){.layout{grid-template-columns:1fr}}
 
-    h1 {
-      text-align: center;
-      margin-bottom: 24px;
-    }
+.panel{
+  background:var(--card);
+  border-radius:14px;
+  border:1px solid var(--line);
+  box-shadow:0 8px 20px rgba(0,0,0,.06);
+  overflow:hidden;
+}
+.panel .hd{
+  padding:14px 16px;
+  background:linear-gradient(90deg,rgba(37,99,235,.15),rgba(34,197,94,.15));
+  font-weight:800;
+}
+.panel .bd{padding:16px}
 
-    .row {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 12px;
-    }
+.section{margin-bottom:18px}
+.section h3{
+  margin:0 0 10px;
+  font-size:13px;
+  font-weight:800;
+  display:flex;align-items:center;gap:6px;
+}
+.section h3::before{
+  content:"";
+  width:10px;height:10px;border-radius:3px;
+  background:var(--brand);
+}
 
-    .field {
-      flex: 1;
-    }
+label{
+  display:block;
+  font-size:12px;
+  font-weight:700;
+  margin:10px 0 6px;
+}
+input,select{
+  width:100%;
+  padding:10px 11px;
+  border-radius:10px;
+  border:1px solid var(--line);
+  font-size:15px;
+}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 
-    .label {
-      font-weight: 600;
-      margin-bottom: 4px;
-      display: block;
-    }
+.preview{
+  margin-top:6px;
+  max-width:100%;
+  max-height:160px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  object-fit:contain;
+}
 
-    input {
-      width: 100%;
-      padding: 6px 8px;
-      font-size: 14px;
-      box-sizing: border-box;
-    }
+/* ===== A4 預覽 ===== */
+.sheet{
+  background:#fff;
+  width:794px;
+  min-height:1123px;
+  margin:auto;
+  padding:36px;
+  border:1px solid var(--line);
+  box-shadow:0 0 10px rgba(0,0,0,.1);
+}
+.sheet .titleWrap{text-align:center;margin-bottom:28px}
+.sheet .titleWrap .corp{
+  font-size:20px;
+  font-weight:800;
+  letter-spacing:1px;
+}
+.sheet .titleWrap .doc{
+  font-size:28px;
+  font-weight:900;
+  letter-spacing:2px;
+  margin-top:6px;
+}
 
-    .preview {
-      margin-top: 6px;
-      max-width: 100%;
-      max-height: 160px;
-      border: 1px solid #ccc;
-    }
+.item{margin-bottom:10px;font-size:15px}
+.label{font-weight:800}
 
-    canvas {
-      border: 1px solid #ccc;
-      width: 100%;
-      height: 120px;
-    }
+.images{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-top:14px;
+}
+.images img{
+  width:100%;
+  max-height:220px;
+  border:1px solid var(--line);
+  object-fit:contain;
+}
 
-    .btn {
-      margin: 24px auto;
-      display: block;
-      font-size: 18px;
-      padding: 12px 28px;
-    }
-  </style>
+/* ===== 簽名 ===== */
+canvas{
+  width:100%;
+  height:160px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  touch-action:none;
+}
+
+.actions{text-align:center;margin-top:16px}
+button{
+  font-size:18px;
+  font-weight:800;
+  padding:12px 28px;
+  border-radius:14px;
+  border:none;
+  cursor:pointer;
+  background:var(--brand);
+  color:#fff;
+}
+</style>
 </head>
 
 <body>
+<div class="container">
+  <div class="layout">
 
-<div id="pdfArea" class="sheet">
-  <h1>勞務報酬單</h1>
+    <!-- 左：填寫 -->
+    <div class="panel">
+      <div class="hd">填寫資料</div>
+      <div class="bd">
 
-  <div class="row">
-    <div class="field">
-      <span class="label">姓名</span>
-      <input id="name">
+        <div class="section">
+          <h3>基本資料</h3>
+          <label>填表日期</label>
+          <input type="date" id="date">
+
+          <div class="row2">
+            <div>
+              <label>姓名</label>
+              <input id="name">
+            </div>
+            <div>
+              <label>身分證字號</label>
+              <input id="idno">
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>專案與所得</h3>
+          <label>公司名稱</label>
+          <input id="company">
+
+          <label>專案名稱</label>
+          <input id="project">
+
+          <label>勞務內容</label>
+          <input id="service">
+
+          <div class="row2">
+            <div>
+              <label>所得類別</label>
+              <select id="income">
+                <option value=""></option>
+                <option>9A 執行業務所得</option>
+                <option>50 薪資所得</option>
+              </select>
+            </div>
+            <div>
+              <label>報酬金額</label>
+              <input id="amount">
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>匯款資料</h3>
+          <label>銀行名稱</label>
+          <input id="bank">
+
+          <div class="row3">
+            <div>
+              <label>分行</label>
+              <input id="branch">
+            </div>
+            <div>
+              <label>帳號</label>
+              <input id="account">
+            </div>
+            <div>
+              <label>戶名</label>
+              <input id="holder">
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>上傳附件（即時預覽）</h3>
+          <label>身分證正面</label>
+          <input type="file" id="idFront"><img id="idFrontP" class="preview">
+          <label>身分證反面</label>
+          <input type="file" id="idBack"><img id="idBackP" class="preview">
+          <label>存摺 / 帳戶影本</label>
+          <input type="file" id="bankImg"><img id="bankImgP" class="preview">
+        </div>
+
+        <div class="section">
+          <h3>簽名</h3>
+          <canvas id="sign"></canvas>
+        </div>
+
+      </div>
     </div>
-    <div class="field">
-      <span class="label">身分證字號</span>
-      <input id="idno">
+
+    <!-- 右：A4 預覽 -->
+    <div class="sheet" id="pdfArea">
+      <div class="titleWrap">
+        <div class="corp">三壐國際整合行銷</div>
+        <div class="doc">勞務報酬單</div>
+      </div>
+
+      <div class="item"><span class="label">填表日期：</span><span id="v_date"></span></div>
+      <div class="item"><span class="label">姓名：</span><span id="v_name"></span></div>
+      <div class="item"><span class="label">身分證字號：</span><span id="v_idno"></span></div>
+      <div class="item"><span class="label">公司名稱：</span><span id="v_company"></span></div>
+      <div class="item"><span class="label">專案名稱：</span><span id="v_project"></span></div>
+      <div class="item"><span class="label">勞務內容：</span><span id="v_service"></span></div>
+      <div class="item"><span class="label">所得類別：</span><span id="v_income"></span></div>
+      <div class="item"><span class="label">報酬金額：</span><span id="v_amount"></span></div>
+      <div class="item"><span class="label">銀行：</span><span id="v_bank"></span></div>
+      <div class="item"><span class="label">分行：</span><span id="v_branch"></span></div>
+      <div class="item"><span class="label">帳號：</span><span id="v_account"></span></div>
+      <div class="item"><span class="label">戶名：</span><span id="v_holder"></span></div>
+
+      <div class="images">
+        <img id="v_idFront">
+        <img id="v_idBack">
+        <img id="v_bankImg">
+        <img id="v_sign">
+      </div>
     </div>
+
   </div>
 
-  <div class="row">
-    <div class="field">
-      <span class="label">公司名稱</span>
-      <input id="company">
-    </div>
-    <div class="field">
-      <span class="label">專案名稱</span>
-      <input id="project">
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="field">
-      <span class="label">勞務內容</span>
-      <input id="service">
-    </div>
-    <div class="field">
-      <span class="label">報酬金額</span>
-      <input id="amount">
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="field">
-      <span class="label">銀行帳號</span>
-      <input id="bank">
-    </div>
-  </div>
-
-  <hr>
-
-  <div class="row">
-    <div class="field">
-      <span class="label">身分證正面</span>
-      <input type="file" id="idFront">
-      <img id="idFrontPreview" class="preview">
-    </div>
-    <div class="field">
-      <span class="label">身分證反面</span>
-      <input type="file" id="idBack">
-      <img id="idBackPreview" class="preview">
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="field">
-      <span class="label">存摺 / 帳戶影本</span>
-      <input type="file" id="bankImg">
-      <img id="bankPreview" class="preview">
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="field">
-      <span class="label">簽名</span>
-      <canvas id="sign"></canvas>
-    </div>
+  <div class="actions">
+    <button id="download">下載 PDF</button>
   </div>
 </div>
 
-<button class="btn" id="download">下載 PDF</button>
-
-<!-- html2canvas + jsPDF -->
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
 <script>
-  function bindPreview(inputId, imgId) {
-    document.getElementById(inputId).addEventListener("change", e => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => document.getElementById(imgId).src = reader.result;
-      reader.readAsDataURL(file);
-    });
+/* 今日日期預設 */
+const today = new Date().toISOString().slice(0,10);
+date.value = today; v_date.textContent = today;
+
+/* 即時同步文字 */
+["name","idno","company","project","service","income","amount","bank","branch","account","holder"]
+.forEach(id=>{
+  document.getElementById(id).addEventListener("input",e=>{
+    document.getElementById("v_"+id).textContent = e.target.value;
+  });
+});
+
+/* 圖片即時預覽 */
+function bindImg(input, preview, viewer){
+  input.onchange = e=>{
+    const f=e.target.files[0]; if(!f) return;
+    const r=new FileReader();
+    r.onload=()=>{preview.src=r.result; viewer.src=r.result;}
+    r.readAsDataURL(f);
   }
+}
+bindImg(idFront,idFrontP,v_idFront);
+bindImg(idBack,idBackP,v_idBack);
+bindImg(bankImg,bankImgP,v_bankImg);
 
-  bindPreview("idFront", "idFrontPreview");
-  bindPreview("idBack", "idBackPreview");
-  bindPreview("bankImg", "bankPreview");
+/* 簽名（平滑、支援手機） */
+const c=sign,ctx=c.getContext("2d");
+let d=false;
+function pos(e){return e.touches?{x:e.touches[0].clientX-c.getBoundingClientRect().left,y:e.touches[0].clientY-c.getBoundingClientRect().top}:{x:e.offsetX,y:e.offsetY}}
+["mousedown","touchstart"].forEach(ev=>c.addEventListener(ev,e=>{d=true;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y)}));
+["mousemove","touchmove"].forEach(ev=>c.addEventListener(ev,e=>{if(!d)return;const p=pos(e);ctx.lineWidth=2;ctx.lineCap="round";ctx.lineTo(p.x,p.y);ctx.stroke()}));
+["mouseup","mouseleave","touchend"].forEach(ev=>c.addEventListener(ev,()=>{d=false;v_sign.src=c.toDataURL()}));
 
-  // 簽名
-  const canvas = document.getElementById("sign");
-  const ctx = canvas.getContext("2d");
-  let drawing = false;
-
-  canvas.addEventListener("mousedown", () => drawing = true);
-  canvas.addEventListener("mouseup", () => drawing = false);
-  canvas.addEventListener("mousemove", e => {
-    if (!drawing) return;
-    ctx.lineWidth = 2;
-    ctx.lineTo(e.offsetX, e.offsetY);
-    ctx.stroke();
-  });
-
-  document.getElementById("download").addEventListener("click", async () => {
-    const canvasImg = await html2canvas(document.getElementById("pdfArea"), { scale: 2 });
-    const imgData = canvasImg.toDataURL("image/png");
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF("p", "mm", "a4");
-
-    const pdfWidth = 210;
-    const pdfHeight = canvasImg.height * pdfWidth / canvasImg.width;
-
-    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-
-    const filename =
-      (document.getElementById("project").value || "勞報單") + "_" +
-      (document.getElementById("name").value || "") + ".pdf";
-
-    pdf.save(filename);
-  });
+/* 下載 PDF */
+download.onclick=async()=>{
+  const canvas=await html2canvas(pdfArea,{scale:2});
+  const img=canvas.toDataURL("image/png");
+  const {jsPDF}=window.jspdf;
+  const pdf=new jsPDF("p","mm","a4");
+  const w=210,h=canvas.height*w/canvas.width;
+  pdf.addImage(img,"PNG",0,0,w,h);
+  pdf.save((project.value||"勞務報酬單")+"_"+(name.value||"")+".pdf");
+}
 </script>
-
 </body>
 </html>
