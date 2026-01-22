@@ -178,389 +178,64 @@
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
   <script>
-    // =========================
-    // 0) 小工具：數字/金額
-    // =========================
-    const toInt = (v) => {
-      const n = parseInt(String(v || "").replace(/[^\d]/g, ""), 10);
-      return Number.isFinite(n) ? n : 0;
-    };
-    const money = (n) => (n || 0).toLocaleString("zh-TW");
+   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script>
+  // ====== PDF 中文不亂碼：每個 doc 都要註冊字體（抓字體只做一次）======
+  let __fontBase64 = null;
+  let __fontFetchPromise = null;
 
-    // =========================
-    // 1) 預設日期
-    // =========================
-    const formDate = document.getElementById("formDate");
-    const today = new Date();
-    formDate.value = new Date(today.getTime() - today.getTimezoneOffset()*60000).toISOString().slice(0,10);
-
-    // =========================
-    // 2) 讀取網址參數（跟原網站一致的那幾個）
-    // =========================
-    const qs = new URLSearchParams(location.search);
-    const presetKeys = ["projectName","companyName","companyContact","serviceContent","incomeCategory"];
-    for (const k of presetKeys) {
-      const el = document.getElementById(k);
-      const val = qs.get(k);
-      if (!val || !el) continue;
-      if (el.tagName === "SELECT") {
-        const v = val.trim().slice(0,2).toUpperCase(); // 支援 "9A 執行業務所得"
-        el.value = (v === "9A" || v === "9B" || v === "50" || v === "92") ? v : "";
-      } else {
-        el.value = val;
-      }
+  function __arrayBufferToBase64(buffer) {
+    let binary = "";
+    const bytes = new Uint8Array(buffer);
+    const chunkSize = 0x8000;
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+      const chunk = bytes.subarray(i, i + chunkSize);
+      binary += String.fromCharCode.apply(null, chunk);
     }
-
-    // =========================
-    // 3) 計算區（可依公司規則調整）
-    // =========================
-    const amountEl = document.getElementById("amount");
-    const unionEl  = document.getElementById("unionInsured");
-    const totalsEl = document.getElementById("totals");
-
-    function recompute() {
-      const amt = toInt(amountEl.value);
-      const tax = (amt >= 20010) ? Math.round(amt * 0.10) : 0;       // 代扣稅 10%
-      const nhi = (!unionEl.checked && amt >= 20000) ? Math.round(amt * 0.0211) : 0; // 二代健保 2.11%
-      const net = amt - tax - nhi;
-
-      totalsEl.innerHTML = `
-        <div>應付總額： <b>${money(amt)}</b> 元</div>
-        <div>− 代扣繳所得稅：(達 20,010 元, 代扣繳 10%)：${money(tax)} 元</div>
-        <div>− 二代健保補充保費：(達 20,000 元, 代扣繳 2.11%)：${money(nhi)} 元</div>
-        <div>= 應付淨額： <b>${money(net)}</b> 元</div>
-      `;
-      return { amt, tax, nhi, net };
-    }
-    amountEl.addEventListener("input", recompute);
-    unionEl.addEventListener("change", recompute);
-    recompute();
-
-    // =========================
-    // 4) 圖片上傳預覽 & 轉 dataURL
-    // =========================
-    async function fileToDataURL(file){
-      return new Promise((resolve, reject) => {
-        const r = new FileReader();
-        r.onload = () => resolve(r.result);
-        r.onerror = reject;
-        r.readAsDataURL(file);
-      });
-    }
-
-    const images = { idFront: null, idBack: null, bankCopy: null };
-
-    async function bindImage(inputId, imgId, key){
-      const input = document.getElementById(inputId);
-      const img = document.getElementById(imgId);
-      input.addEventListener("change", async () => {
-        const f = input.files?.[0];
-        if (!f) { images[key] = null; img.removeAttribute("src"); return; }
-        const url = await fileToDataURL(f);
-        images[key] = url;
-        img.src = url;
-      });
-    }
-    bindImage("idFront","idFrontPreview","idFront");
-    bindImage("idBack","idBackPreview","idBack");
-    bindImage("bankCopy","bankCopyPreview","bankCopy");
-
-    // 自動判斷 dataURL 圖片格式（避免寫死 JPEG）
-    function detectImageType(dataUrl) {
-      if (typeof dataUrl !== "string") return "JPEG";
-      if (dataUrl.startsWith("data:image/png")) return "PNG";
-      if (dataUrl.startsWith("data:image/webp")) return "WEBP";
-      return "JPEG";
-    }
-
-    // =========================
-    // 5) 手寫簽名
-    // =========================
-    const canvas = document.getElementById("sigCanvas");
-    const ctx = canvas.getContext("2d");
-
-    function resizeCanvas() {
-      const rect = canvas.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = Math.round(rect.width * dpr);
-      canvas.height = Math.round(rect.height * dpr);
-      ctx.setTransform(dpr,0,0,dpr,0,0);
-      ctx.lineWidth = 2;
-      ctx.lineCap = "round";
-      ctx.strokeStyle = "#111";
-    }
-    window.addEventListener("resize", resizeCanvas);
-    resizeCanvas();
-
-    let drawing = false;
-    let last = null;
-    function getPos(e){
-      const r = canvas.getBoundingClientRect();
-      const t = e.touches ? e.touches[0] : e;
-      return { x: t.clientX - r.left, y: t.clientY - r.top };
-    }
-    function start(e){ drawing = true; last = getPos(e); e.preventDefault(); }
-    function move(e){
-      if (!drawing) return;
-      const p = getPos(e);
-      ctx.beginPath();
-      ctx.moveTo(last.x, last.y);
-      ctx.lineTo(p.x, p.y);
-      ctx.stroke();
-      last = p;
-      e.preventDefault();
-    }
-    function end(){ drawing = false; last = null; }
-
-    canvas.addEventListener("mousedown", start);
-    canvas.addEventListener("mousemove", move);
-    window.addEventListener("mouseup", end);
-    canvas.addEventListener("touchstart", start, { passive:false });
-    canvas.addEventListener("touchmove", move, { passive:false });
-    canvas.addEventListener("touchend", end);
-
-    document.getElementById("sigClear").addEventListener("click", () => {
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-    });
-
-    function signatureDataURL(){
-      // 若空白簽名，回傳 null
-      const tmp = document.createElement("canvas");
-      tmp.width = canvas.width; tmp.height = canvas.height;
-      tmp.getContext("2d").drawImage(canvas,0,0);
-
-      const pixels = ctx.getImageData(0,0,Math.min(40,canvas.width),Math.min(40,canvas.height)).data;
-      let ink = 0;
-      for (let i=0;i<pixels.length;i+=4){
-        if (pixels[i+3] !== 0) { ink++; if (ink>20) break; }
-      }
-      return ink>20 ? tmp.toDataURL("image/png") : null;
-    }
-
-    // =========================
-    // 6) PDF 中文不變方塊：內嵌中文字體
-    // =========================
- // ====== PDF 中文不亂碼：每個 doc 都要註冊字體（抓字體只做一次）======
-let __fontBase64 = null;
-let __fontFetchPromise = null;
-
-function arrayBufferToBase64(buffer) {
-  let binary = "";
-  const bytes = new Uint8Array(buffer);
-  const chunkSize = 0x8000;
-  for (let i = 0; i < bytes.length; i += chunkSize) {
-    const chunk = bytes.subarray(i, i + chunkSize);
-    binary += String.fromCharCode.apply(null, chunk);
-  }
-  return btoa(binary);
-}
-
-async function ensureChineseFont(doc) {
-  // 1) 只抓字體一次，存成 base64
-  if (!__fontBase64) {
-    if (!__fontFetchPromise) {
-      __fontFetchPromise = (async () => {
-        const res = await fetch("./fonts/NotoSansTC-Regular.ttf", { cache: "no-store" });
-        if (!res.ok) throw new Error("字體載入失敗：找不到 ./fonts/NotoSansTC-Regular.ttf");
-        const buf = await res.arrayBuffer();
-        __fontBase64 = arrayBufferToBase64(buf);
-      })();
-    }
-    await __fontFetchPromise;
+    return btoa(binary);
   }
 
-  // 2) ⚠️ 每次 new jsPDF() 都是新 doc，所以每次都要註冊到這個 doc
-  doc.addFileToVFS("NotoSansTC-Regular.ttf", __fontBase64);
-  doc.addFont("NotoSansTC-Regular.ttf", "NotoSansTC", "normal");
-  doc.setFont("NotoSansTC", "normal");
-} 
-    // =========================
-    // 7) 下載 PDF：固定版型
-    // =========================
-    const fontWarn = document.getElementById("fontWarn");
+  async function ensureChineseFont(doc) {
+    if (!__fontBase64) {
+      if (!__fontFetchPromise) {
+        __fontFetchPromise = (async () => {
+          const res = await fetch("./fonts/NotoSansTC-Regular.ttf", { cache: "no-store" });
+          if (!res.ok) throw new Error("字體載入失敗：找不到 ./fonts/NotoSansTC-Regular.ttf");
+          const buf = await res.arrayBuffer();
+          __fontBase64 = __arrayBufferToBase64(buf);
+        })();
+      }
+      await __fontFetchPromise;
+    }
 
-    function getVal(id){ return (document.getElementById(id).value || "").trim(); }
-    function safeFileName(s){ return (s || "labor-form").replace(/[\\/:*?"<>|]/g, "_"); }
+    doc.addFileToVFS("NotoSansTC-Regular.ttf", __fontBase64);
+    doc.addFont("NotoSansTC-Regular.ttf", "NotoSansTC", "normal");
+    doc.setFont("NotoSansTC", "normal");
+  }
 
-    document.getElementById("downloadPdf").addEventListener("click", async () => {
-      fontWarn.textContent = "";
-
+  // ====== 綁定下載按鈕（測試版，確保一定有反應）======
+  const btn = document.getElementById("downloadPdf");
+  if (btn) {
+    btn.addEventListener("click", async () => {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ unit: "mm", format: "a4" });
 
-      // 套用中文字體（確保 PDF 中文正常）
       try {
         await ensureChineseFont(doc);
       } catch (e) {
-        fontWarn.textContent = "⚠️ 中文字體載入失敗：請在 repo 放入 fonts/NotoSansTC-Regular.ttf";
-        // 退而求其次：至少還能輸出，但中文可能會方塊
+        // 字體真的載不到，至少還能下載（但中文可能會壞）
         doc.setFont("helvetica", "normal");
       }
 
-      const calc = recompute();
-
-      // 版面參數
-      const pageW = 210, pageH = 297;
-      const margin = 12;
-      let y = 14;
-
-      // 標題
       doc.setFontSize(16);
-      doc.text("勞務報酬單", pageW/2, y, { align: "center" });
-
-      doc.setFontSize(10);
-      const dateText = getVal("formDate") || "";
-      doc.text(`製表日期：${dateText}`, pageW - margin, y, { align:"right" });
-
-      y += 8;
-      doc.setLineWidth(0.3);
-      doc.rect(margin, y, pageW - margin*2, pageH - y - margin);
-
-      // 兩欄欄位框
-      const leftX = margin+2;
-      const colGap = 4;
-      const colW = (pageW - margin*2 - 4 - colGap) / 2;
-      const rightX = leftX + colW + colGap;
-
-      function fieldBox(label, value, x, y, w){
-        doc.rect(x, y, w, 10);
-        doc.setFontSize(9);
-        doc.text(label, x+2, y+4);
-        doc.setFontSize(11);
-        doc.text(value || "-", x+2, y+8);
-      }
-
-      function fieldBoxWrap(label, value, x, y, w, h){
-        doc.rect(x, y, w, h);
-        doc.setFontSize(9);
-        doc.text(label, x+2, y+4);
-        doc.setFontSize(11);
-        const lines = doc.splitTextToSize(value || "-", w - 4);
-        doc.text(lines, x+2, y+9);
-      }
-
-      // 區塊：領款人基本資料
-      y += 8;
+      doc.text("測試中文：勞務報酬單", 20, 30);
       doc.setFontSize(12);
-      doc.text("領款人基本資料", margin+2, y);
+      doc.text("如果你看到這行中文正常，代表字體嵌入成功。", 20, 45);
 
-      y += 4;
-      fieldBox("姓名", getVal("payeeName"), leftX, y, colW);
-      fieldBox("身分證字號/居留證號", getVal("payeeId"), rightX, y, colW);
-      y += 12;
-
-      fieldBox("聯絡方式", getVal("payeeContact"), leftX, y, colW);
-      fieldBox("國籍", getVal("payeeNationality"), rightX, y, colW);
-      y += 12;
-
-      fieldBoxWrap("戶籍地址", getVal("payeeAddress"), leftX, y, colW*2 + colGap, 14);
-      y += 18;
-
-      // 區塊：專案資訊
-      doc.setFontSize(12);
-      doc.text("專案資訊", margin+2, y);
-      y += 4;
-
-      fieldBox("專案名稱", getVal("projectName"), leftX, y, colW);
-      fieldBox("勞務內容", getVal("serviceContent"), rightX, y, colW);
-      y += 12;
-
-      fieldBox("公司名稱", getVal("companyName"), leftX, y, colW);
-      fieldBox("公司聯絡方式", getVal("companyContact"), rightX, y, colW);
-      y += 12;
-
-      fieldBox("所得類別", getVal("incomeCategory"), leftX, y, colW);
-      fieldBox("金額", String(toInt(getVal("amount"))), rightX, y, colW);
-      y += 14;
-
-      // 計算區
-      doc.setLineWidth(0.2);
-      doc.rect(leftX, y, colW*2 + colGap, 22);
-      doc.setFontSize(10);
-      doc.text(`應付總額：${money(calc.amt)} 元`, leftX+2, y+6);
-      doc.text(`- 代扣繳所得稅：(達 20,010 元, 代扣繳 10%)：${money(calc.tax)} 元`, leftX+2, y+12);
-      doc.text(`- 二代健保補充保費：(達 20,000 元, 代扣繳 2.11%)：${money(calc.nhi)} 元`, leftX+2, y+18);
-      doc.setFontSize(11);
-      doc.text(`= 應付淨額：${money(calc.net)} 元`, pageW - margin - 2, y+18, { align:"right" });
-      y += 26;
-
-      // 身分證件影像
-      doc.setFontSize(12);
-      doc.text("領款人身分證件", margin+2, y);
-      y += 4;
-
-      const imgBoxH = 45;
-      doc.setFontSize(10);
-      doc.rect(leftX, y, colW, imgBoxH);
-      doc.rect(rightX, y, colW, imgBoxH);
-      doc.text("正面", leftX+2, y+4);
-      doc.text("反面", rightX+2, y+4);
-
-      const pad = 2;
-      if (images.idFront) doc.addImage(images.idFront, detectImageType(images.idFront), leftX+pad, y+8, colW-pad*2, imgBoxH-10);
-      if (images.idBack)  doc.addImage(images.idBack,  detectImageType(images.idBack),  rightX+pad, y+8, colW-pad*2, imgBoxH-10);
-
-      y += imgBoxH + 8;
-
-      // 付款方式
-      doc.setFontSize(12);
-      doc.text("付款方式", margin+2, y);
-      y += 4;
-
-      fieldBox("銀行", getVal("bankName"), leftX, y, colW);
-      fieldBox("分行", getVal("bankBranch"), rightX, y, colW);
-      y += 12;
-
-      fieldBox("戶名", getVal("bankAccountName"), leftX, y, colW);
-      fieldBox("帳號", getVal("bankAccountNumber"), rightX, y, colW);
-      y += 14;
-
-      // 帳戶影本
-      const bankH = 55;
-      doc.setFontSize(10);
-      doc.rect(leftX, y, colW*2 + colGap, bankH);
-      doc.text("帳戶影本", leftX+2, y+4);
-      if (images.bankCopy){
-        doc.addImage(images.bankCopy, detectImageType(images.bankCopy), leftX+2, y+8, colW*2 + colGap - 4, bankH - 10);
-      } else {
-        doc.text("(未上傳)", leftX+2, y+12);
-      }
-      y += bankH + 8;
-
-      // 簽名
-      doc.setFontSize(12);
-      doc.text("簽名", margin+2, y);
-      y += 4;
-
-      const sigH = 35;
-      doc.setFontSize(10);
-      doc.rect(leftX, y, colW*2 + colGap, sigH);
-      doc.text("領款人簽名", leftX+2, y+4);
-
-      const sig = signatureDataURL();
-      if (sig){
-        doc.addImage(sig, "PNG", leftX+2, y+8, 70, 22);
-      } else {
-        doc.text("(未簽名)", leftX+2, y+12);
-      }
-      y += sigH + 8;
-
-      // 聲明
-      doc.setFontSize(9);
-      const statements = [
-        "聲明：",
-        "1. 本表單所有欄位若未完整填寫，將會影響您的請款流程，敬請配合。",
-        "2. 填寫完畢後，請下載將PDF檔案並傳送給本公司企劃人員。",
-        "3. 本工具不會紀錄及搜集任何資料與圖片，重新整理網頁後，所有已填資料將會自動消失，請安心使用。"
-      ];
-      const stLines = statements.flatMap(t => doc.splitTextToSize(t, pageW - margin*2 - 4));
-      const finalY = Math.min(y, pageH - margin - 22);
-      doc.text(stLines, leftX, finalY);
-
-      // 檔名
-      const safeProject = safeFileName(getVal("projectName"));
-      doc.save(`勞報單_${safeProject}.pdf`);
+      doc.save("test.pdf");
     });
+  }
+</script>
   </script>
 </body>
 </html>
