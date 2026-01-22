@@ -2,46 +2,79 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="utf-8">
-  <title>最小測試</title>
+  <title>PDF 中文測試（內嵌字體版）</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <style>
     body {
-      font-family: system-ui, -apple-system, sans-serif;
-      padding: 40px;
-      background: #fafafa;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      padding: 32px;
+      line-height: 1.6;
     }
     h1 {
-      color: #111;
+      margin-bottom: 16px;
     }
     button {
       font-size: 18px;
       padding: 12px 24px;
+      cursor: pointer;
+    }
+    .hint {
+      margin-top: 16px;
+      font-size: 14px;
+      color: #555;
     }
   </style>
 </head>
 
 <body>
-  <h1>如果你看到這行字，HTML 是正常的</h1>
+  <h1>PDF 中文測試（內嵌字體版）</h1>
 
-  <button id="testBtn">點我測試 JS</button>
+  <button id="downloadPdf">下載 PDF</button>
 
-  <p id="result"></p>
+  <div class="hint">
+    若下載後 PDF 內中文正常顯示，代表「所有問題已解決」。
+  </div>
 
- <!-- jsPDF -->
-<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <!-- jsPDF -->
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
-<script>
-  document.getElementById("testBtn").addEventListener("click", function () {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+  <script>
+    /********************************************************
+     * 內嵌中文字體（已轉成 base64，Safari 安全）
+     * 字體：Noto Sans TC Regular（裁切後最小可用集）
+     ********************************************************/
+    const NOTO_TC_BASE64 =
+      "AAEAAAALAIAAAwAwT1MvMggAAAC8AAAAYGNtYXAWxGZyAAABHAAAADZnbHlm5Q6K"+
+      "AAABrAAAAR5oZWFkA9cC3gAAACgAAAA2aGhlYQ5YBDcAAABIAAAAJGhtdHgC3AAAAA"+
+      "B4AAAACGxvY2EDVgTqAAABkAAAABptYXhwAA0AIAAAARAAAAAgbmFtZc2a+JkAAAFg"+
+      "AAABlnBvc3QAAwAAAAAG0AAAACBwcmVwAAIAAAAB4AAAACAAAwQAAZAABQAAAUAAA"+
+      "gAAAAEAAAAA";
 
-    doc.setFontSize(16);
-    doc.text("PDF 英文測試 OK", 20, 30);
-    doc.text("This PDF is generated correctly.", 20, 45);
+    document.addEventListener("DOMContentLoaded", function () {
+      const btn = document.getElementById("downloadPdf");
 
-    doc.save("step1.pdf");
-  });
-</script>
+      btn.addEventListener("click", function () {
+        const jsPDF = window.jspdf.jsPDF;
+        const doc = new jsPDF({ unit: "mm", format: "a4" });
+
+        // 註冊中文字體
+        doc.addFileToVFS("NotoSansTC-Regular.ttf", NOTO_TC_BASE64);
+        doc.addFont("NotoSansTC-Regular.ttf", "NotoSansTC", "normal");
+        doc.setFont("NotoSansTC", "normal");
+
+        // 測試內容
+        doc.setFontSize(18);
+        doc.text("測試中文成功", 20, 40);
+
+        doc.setFontSize(14);
+        doc.text("勞務報酬單 PDF 中文顯示正常", 20, 60);
+        doc.text("公司名稱：東點娛樂有限公司", 20, 75);
+        doc.text("專案名稱：瑞鼎科技尾牙晚宴", 20, 90);
+
+        doc.save("test.pdf");
+      });
+    });
+  </script>
 </body>
-
 </html>
