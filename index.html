@@ -283,18 +283,23 @@
   .topfield input{
     width: 100%;
   }
-     @media (max-width: 520px){
-
-  /* ✅ 應付總額：手機版改成上下排列、靠左 */
+    @media (max-width: 520px){
+  /* ✅ 應付總額：手機版維持同一行、整排靠左 */
   .amountRow{
-    grid-template-columns: 1fr;
-    gap: 6px;
-    margin-bottom: 10px;
+    grid-template-columns: 96px 1fr 28px; /* 左：標籤 / 中：輸入 / 右：元 */
+    gap: 8px;
+    align-items: center;
+    justify-content: start;
   }
 
   .amountRow .lab{
     text-align: left;
-    font-weight: 800;
+    font-weight: 900;
+    white-space: nowrap;
+  }
+
+  .amountRow input{
+    width: 100%;
   }
 }
     }
