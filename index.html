@@ -283,7 +283,19 @@
   .topfield input{
     width: 100%;
   }
-}
+     @media (max-width: 520px){
+
+  /* ✅ 應付總額：手機版改成上下排列、靠左 */
+  .amountRow{
+    grid-template-columns: 1fr;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .amountRow .lab{
+    text-align: left;
+    font-weight: 800;
+  }
 }
     }
   </style>
