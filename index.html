@@ -252,24 +252,38 @@
     grid-template-columns: 64px 1fr;
   }
 
-  /* 🔑 核心：手機版欄位改成上下排列 */
+  /* ✅ 手機版：每一欄改成上下排列，並統一間距 */
   .grid2{
     grid-template-columns: 1fr;
+    gap: 6px;              /* label 與 input 的距離 */
+    margin-bottom: 14px;   /* 每一欄之間的距離（統一） */
+    align-items: stretch;  /* 不要用 center */
   }
 
+  /* ✅ label 改成靠左、像標題 */
   .grid2 .lab{
     text-align: left;
-    margin-bottom: 4px;
-    font-weight: 700;
+    padding-left: 2px;
+    font-weight: 800;
+    color: #111827;
+    line-height: 1.2;
+    margin: 0;            /* 清掉可能的預設間距 */
   }
 
+  /* ✅ input / select 變滿版 */
+  .grid2 input,
+  .grid2 select{
+    width: 100%;
+  }
+
+  /* 製表日期那行靠左 */
   .topfield{
     justify-content: flex-start;
   }
-
   .topfield input{
     width: 100%;
   }
+}
 }
     }
   </style>
