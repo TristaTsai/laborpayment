@@ -247,13 +247,30 @@
       line-height:1.6;
     }
 
-    @media (max-width: 520px){
-      .row{grid-template-columns:64px 1fr}
-      .grid2{grid-template-columns:100px 1fr}
-      .topfield input{width:100%}
- .topfield{
-    justify-content:flex-start;
+   @media (max-width: 520px){
+  .row{
+    grid-template-columns: 64px 1fr;
   }
+
+  /* 🔑 核心：手機版欄位改成上下排列 */
+  .grid2{
+    grid-template-columns: 1fr;
+  }
+
+  .grid2 .lab{
+    text-align: left;
+    margin-bottom: 4px;
+    font-weight: 700;
+  }
+
+  .topfield{
+    justify-content: flex-start;
+  }
+
+  .topfield input{
+    width: 100%;
+  }
+}
     }
   </style>
 </head>
